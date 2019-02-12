@@ -14,13 +14,13 @@
   %=========
   % 中文信息
   %=========
-  ctitle={清华大学学位论文 \LaTeX\ 模板\\使用示例文档 v\version},
-  cdegree={工学硕士},
-  cdepartment={计算机科学与技术系},
-  cmajor={计算机科学与技术},
+  ctitle={C程序接口缺陷\\静态检测技术研究},
+  cdegree={工学博士},
+  cdepartment={软件学院},
+  cmajor={软件工程},
   cauthor={谷祖兴},
   csupervisor={顾明教授},
-  cassosupervisor={孙家广教授}, % 副指导老师
+  % cassosupervisor={孙家广教授}, % 副指导老师
   %ccosupervisor={某某某教授}, % 联合指导老师
   % 日期自动使用当前时间，若需指定按如下方式修改：
   % cdate={超新星纪元},
@@ -36,7 +36,7 @@
   %=========
   % 英文信息
   %=========
-  etitle={An Introduction to \LaTeX{} Thesis Template of Tsinghua University v\version},
+  etitle={Static Analysis Based API-Misuse Bug Detection in C Programs},
   % 这块比较复杂，需要分情况讨论：
   % 1. 学术型硕士
   %    edegree：必须为Master of Arts或Master of Science（注意大小写）
@@ -52,65 +52,39 @@
   % 4. 专业型博士
   %    edegree：“填写专业学位英文名称全称”
   %    emajor：不填写此项
-  edegree={Doctor of Engineering},
-  emajor={Computer Science and Technology},
+  edegree={Doctor of Philosophy},
+  emajor={Software Engineering},
   eauthor={Gu Zuxing},
   esupervisor={Professor Gu Ming},
-  eassosupervisor={Professor Sun Jiaguang},
+  % eassosupervisor={Professor Sun Jiaguang},
   % 日期自动生成，若需指定按如下方式修改：
   % edate={December, 2005}
   %
   % 关键词用“英文逗号”分割
-  ckeywords={\TeX, \LaTeX, CJK, 模板, 论文},
-  ekeywords={\TeX, \LaTeX, CJK, template, thesis}
+  %ckeywords={API误用；静态分析；调研；缺陷检测},
+  %ekeywords={API misuse; Static analysis; Empirical study; Bug detection}
 }
 
 % 定义中英文摘要和关键字
 \begin{cabstract}
-  论文的摘要是对论文研究内容和成果的高度概括。摘要应对论文所研究的问题及其研究目
-  的进行描述，对研究方法和过程进行简单介绍，对研究成果和所得结论进行概括。摘要应
-  具有独立性和自明性，其内容应包含与论文全文同等量的主要信息。使读者即使不阅读全
-  文，通过摘要就能了解论文的总体内容和主要成果。
-
-  论文摘要的书写应力求精确、简明。切忌写成对论文书写内容进行提要的形式，尤其要避
-  免“第 1 章……；第 2 章……；……”这种或类似的陈述方式。
-
-  本文介绍清华大学论文模板 \thuthesis{} 的使用方法。本模板符合学校的本科、硕士、
-  博士论文格式要求。
-
-  本文的创新点主要有：
+  TODO:\\
+  问题\\
+  目的\\
+  主要内容包括：
   \begin{itemize}
-    \item 用例子来解释模板的使用方法；
-    \item 用废话来填充无关紧要的部分；
-    \item 一边学习摸索一边编写新代码。
+  	\item 1；
+  	\item 2；
+  	\item 3。
   \end{itemize}
-
-  关键词是为了文献标引工作、用以表示全文主要内容信息的单词或术语。关键词不超过 5
-  个，每个关键词中间用分号分隔。（模板作者注：关键词分隔符不用考虑，模板会自动处
-  理。英文关键词同理。）
+  
+  本文的研究成果均已集成于可信软件工具集TsmartV3中，并成功应用于开源软件。在Linux内核、OpenSSL加密库、Ubuntu应用软件等项目中，发现TODO个实际缺陷，其中TODO个已经被开发者修复。
 \end{cabstract}
 
 % 如果习惯关键字跟在摘要文字后面，可以用直接命令来设置，如下：
-% \ckeywords{\TeX, \LaTeX, CJK, 模板, 论文}
+\ckeywords{API误用；静态分析；调研；缺陷检测}
 
 \begin{eabstract}
-   An abstract of a dissertation is a summary and extraction of research work
-   and contributions. Included in an abstract should be description of research
-   topic and research objective, brief introduction to methodology and research
-   process, and summarization of conclusion and contributions of the
-   research. An abstract should be characterized by independence and clarity and
-   carry identical information with the dissertation. It should be such that the
-   general idea and major contributions of the dissertation are conveyed without
-   reading the dissertation.
-
-   An abstract should be concise and to the point. It is a misunderstanding to
-   make an abstract an outline of the dissertation and words ``the first
-   chapter'', ``the second chapter'' and the like should be avoided in the
-   abstract.
-
-   Key words are terms used in a dissertation for indexing, reflecting core
-   information of the dissertation. An abstract may contain a maximum of 5 key
-   words, with semi-colons used in between to separate one another.
+   TODO
 \end{eabstract}
 
-% \ekeywords{\TeX, \LaTeX, CJK, template, thesis}
+\ekeywords{API misuse; Static analysis; Empirical study; Bug detection}

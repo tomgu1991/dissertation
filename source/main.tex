@@ -1,4 +1,4 @@
-\documentclass[degree=master, tocarialchapter]{thuthesis}
+\documentclass[degree=doctor, tocarialchapter]{thuthesis}
 % 选项
 %   degree=[bachelor|master|doctor|postdoctor], % 必选，学位类型
 %   secret,                % 可选（默认：关闭），是否有密级
@@ -36,6 +36,9 @@
 \mainmatter
 \include{data/chap01}
 \include{data/chap02}
+\include{data/chap03}
+\include{data/chap04}
+\include{data/chap05}
 
 
 %%% 其它部分
@@ -64,14 +67,14 @@
 \include{data/ack}
 
 %% 附录
-\begin{appendix}
-\input{data/appendix01}
-\end{appendix}
+%\begin{appendix}
+%\input{data/appendix01}
+%\end{appendix}
 
 %% 个人简历
 \include{data/resume}
 
 %% 本科生进行格式审查是需要下面这个表格，答辩可能不需要。选择性留下。
 % 综合论文训练记录表
-\includepdf[pages=-]{scan-record.pdf}
+%\includepdf[pages=-]{scan-record.pdf}
 \end{document}
