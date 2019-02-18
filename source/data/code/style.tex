@@ -1,0 +1,42 @@
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{blue}{rgb}{0,0,1}
+\definecolor{green}{rgb}{0,0.8,0}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{light-gray}{gray}{0.25}
+\definecolor{numberColor}{rgb}{0.5,0.5,0.5}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+\definecolor{diffstart}{rgb}{0.5,0.5,0.5}
+\definecolor{diffincl}{rgb}{0,1,0}
+\definecolor{diffrem}{rgb}{1,0,0}
+
+\lstset{
+	language=C,
+	float=[tb],
+	aboveskip=0.5em,
+	belowskip=0em,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\scriptsize\ttfamily\bfseries},
+	numberstyle=\color{numberColor},
+	numbers=left,
+	xleftmargin=24.0ex,
+	% frame=b,
+	keywordstyle=\color{blue},
+	commentstyle=\color{gray},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=4, 
+	sensitive = true,
+	morestring=*[d]{"},
+	morestring=[s][]{\#\{}{\}},
+	morecomment=[f][\color{diffstart}]{@},
+	morecomment=[f][\color{diffstart}]{file},
+	morecomment=[f][\color{diffstart}]{index},
+	morecomment=[f][\color{diffincl}]{+},
+	morecomment=[f][\color{diffrem}]{-},
+	morecomment=[f][\color{Black}]{Log},
+	escapeinside={(*@}{@*)},
+	float=ht,
+	% captionpos=b,
+}

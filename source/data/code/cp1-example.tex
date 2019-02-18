@@ -1,0 +1,39 @@
+\begin{figure}
+	
+	\centering
+\begin{lstlisting}
+	========== Incorrect Usage ==========
+Location: OpenSSL/crypto/x509/x509_req.c: 70
+X509_REQ *X509_to_X509_REQ(...){
+	[(*@\dots@*)]
+	(*@\textcolor{mauve}{pktmp = X509\_get\_pubkey(x);}@*)
+	// missing certificate validation of pktmp
+	(*@\textcolor{green}{+ if (pktmp == NULL)}@*)
+	(*@\textcolor{green}{+ ~~~~goto err;}@*)
+	i = X509_REQ_set_pubkey(ret, (*@\textcolor{mauve}{pktmp}@*));
+	EVP_PKEY_free(pktmp);
+	[(*@\dots@*)]
+}
+
+	========== Correct Usage ==========
+
+Location: /crypto/x509/x509_cmp.c: 390
+int X509_chain_check_suiteb(...){
+	[(*@\dots@*)]
+	(*@\textcolor{mauve}{pk = X509\_get\_pubkey(x);}@*)
+	rv = check_suite_b((*@\textcolor{mauve}{pk}@*), -1, &tflags);
+	[(*@\dots@*)]
+} 
+
+static int check_suite_b(EVP_PKEY *(*@\textcolor{mauve}{pkey}@*),...){
+	[(*@\dots@*)]
+	// ensure pkey not NULL
+	(*@\textcolor{mauve}{if (pkey \&\& ...)}@*)
+	[...]// error handling
+}
+\end{lstlisting}
+	\caption{
+	缺失参数检查导致的漏洞CVE-2015-0288~\cite{CVE-2015-0288}
+	}
+	\label{fig:1-1-example}
+\end{figure}
