@@ -655,7 +655,7 @@
 	publisher={Springer}
 }
 
-@inproceedings{chan2002overview,
+@inproceedings{02-icis-integration-testing,
 	title={An overview of integration testing techniques for object-oriented programs},
 	author={Chan, WK and Chen, TY and Tse, TH},
 	booktitle={Proceedings of the 2nd ACIS Annual International Conference on Computer and Information Science (ICIS 2002)},
@@ -697,6 +697,24 @@
 	booktitle={Presented as part of the 2012 $\{$USENIX$\}$ Annual Technical Conference ($\{$USENIX$\}$$\{$ATC$\}$ 12)},
 	pages={309--318},
 	year={2012}
+}
+
+@online{clang,
+	title =       {Clang: a C language family frontend for LLVM},
+	citedate =    {2019-02-18},
+	url =         {https://clang.llvm.org/},
+}
+
+@online{gcc,
+	title =       {GCC: the GNU Compiler Collection},
+	citedate =    {2019-02-18},
+	url =         {https://gcc.gnu.org/},
+}
+
+@online{xcode,
+	title =       {Xcode: an integrated development environment (IDE) for macOS},
+	citedate =    {2019-02-18},
+	url =         {https://developer.apple.com/xcode/},
 }
 
 @online{AddressSanitizerFoundBugs,
@@ -746,6 +764,17 @@
 	bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
+@article{08-ieee-static,
+	title={Using static analysis to find bugs},
+	author={Ayewah, Nathaniel and Hovemeyer, David and Morgenthaler, J David and Penix, John and Pugh, William},
+	journal={IEEE software},
+	volume={25},
+	number={5},
+	pages={22--29},
+	year={2008},
+	publisher={IEEE}
+}
+
 @article{08-tcad-sv,
 	title={A survey of automated techniques for formal software verification},
 	author={D'silva, Vijay and Kroening, Daniel and Weissenbacher, Georg},
@@ -756,6 +785,161 @@
 	year={2008},
 	publisher={IEEE}
 }
+
+@article{rp,
+	title={Program analysis via graph reachability},
+	author={Reps, Thomas},
+	journal={Information and software technology},
+	volume={40},
+	number={11-12},
+	pages={701--726},
+	year={1998},
+	publisher={Elsevier}
+}
+
+@online{slam,
+	title =       {SLAM: a project for checking that software satisfies critical behavioral properties of the interfaces.},
+	citedate =    {2019-02-18},
+	url =         {https://www.microsoft.com/en-us/research/project/slam/},
+}
+
+
+@inproceedings{02-acm-slam,
+	title={The S LAM project: debugging system software via static analysis},
+	author={Ball, Thomas and Rajamani, Sriram K},
+	booktitle={ACM SIGPLAN Notices},
+	volume={37},
+	number={1},
+	pages={1--3},
+	year={2002},
+	organization={ACM}
+}
+
+@inproceedings{00-cav-counter,
+	title={Counterexample-guided abstraction refinement},
+	author={Clarke, Edmund and Grumberg, Orna and Jha, Somesh and Lu, Yuan and Veith, Helmut},
+	booktitle={International Conference on Computer Aided Verification},
+	pages={154--169},
+	year={2000},
+	organization={Springer}
+}
+
+@article{02-acm-abs,
+	title={Lazy abstraction},
+	author={Henzinger, Thomas A and Jhala, Ranjit and Majumdar, Rupak and Sutre, Gr{\'e}goire},
+	journal={ACM SIGPLAN Notices},
+	volume={37},
+	number={1},
+	pages={58--70},
+	year={2002},
+	publisher={ACM}
+}
+
+@article{11-acm-slam,
+	title={A decade of software model checking with SLAM},
+	author={Ball, Thomas and Levin, Vladimir and Rajamani, Sriram K},
+	journal={Communications of the ACM},
+	volume={54},
+	number={7},
+	pages={68--76},
+	year={2011},
+	publisher={Citeseer}
+}
+
+@inproceedings{10-cad-slam,
+	title={SLAM2: Static driver verification with under 4\% false alarms},
+	author={Ball, Thomas and Bounimova, Ella and Kumar, Rahul and Levin, Vladimir},
+	booktitle={Proceedings of the 2010 Conference on Formal Methods in Computer-Aided Design},
+	pages={35--42},
+	year={2010},
+	organization={FMCAD Inc}
+}
+
+@techreport{01-slic,
+	title={SLIC: A specification language for interface checking (of C)},
+	author={Ball, Thomas and Rajamani, Sriram K},
+	year={2001},
+	institution={Technical Report MSR-TR-2001-21, Microsoft Research}
+}
+
+@inproceedings{07-cav-cpachecker,
+	title={Configurable software verification: Concretizing the convergence of model checking and program analysis},
+	author={Beyer, Dirk and Henzinger, Thomas A and Th{\'e}oduloz, Gr{\'e}gory},
+	booktitle={International Conference on Computer Aided Verification},
+	pages={504--518},
+	year={2007},
+	organization={Springer}
+}
+
+@inproceedings{14-tacas-cbmc,
+	author    = {Daniel Kroening and
+	Michael Tautschnig},
+	title     = {{CBMC} - {C} Bounded Model Checker - (Competition Contribution)},
+	booktitle = {Tools and Algorithms for the Construction and Analysis of Systems
+	- 20th International Conference, {TACAS} 2014, Held as Part of the
+	European Joint Conferences on Theory and Practice of Software, {ETAPS}
+	2014, Grenoble, France, April 5-13, 2014. Proceedings},
+	pages     = {389--391},
+	year      = {2014},
+	url       = {https://doi.org/10.1007/978-3-642-54862-8\_26},
+	doi       = {10.1007/978-3-642-54862-8\_26},
+	timestamp = {Tue, 26 Jun 2018 14:11:56 +0200},
+	biburl    = {https://dblp.org/rec/bib/conf/tacas/KroeningT14},
+	bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{14-cav-smack,
+	author    = {Zvonimir Rakamaric and
+	Michael Emmi},
+	title     = {{SMACK:} Decoupling Source Language Details from Verifier Implementations},
+	booktitle = {Computer Aided Verification - 26th International Conference, {CAV}
+	2014, Held as Part of the Vienna Summer of Logic, {VSL} 2014, Vienna,
+	Austria, July 18-22, 2014. Proceedings},
+	pages     = {106--113},
+	year      = {2014},
+	url       = {https://doi.org/10.1007/978-3-319-08867-9\_7},
+	doi       = {10.1007/978-3-319-08867-9\_7},
+	timestamp = {Wed, 03 Oct 2018 12:55:01 +0200},
+	biburl    = {https://dblp.org/rec/bib/conf/cav/RakamaricE14},
+	bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{07-ase-ddverify,
+	title={Model checking concurrent linux device drivers},
+	author={Witkowski, Thomas and Blanc, Nicolas and Kroening, Daniel and Weissenbacher, Georg},
+	booktitle={Proceedings of the twenty-second IEEE/ACM international conference on Automated software engineering},
+	pages={501--504},
+	year={2007},
+	organization={ACM}
+}
+
+@article{09-avinux,
+	title={Towards automatic software model checking of thousands of Linux modules—a case study with Avinux},
+	author={Post, Hendrik and Sinz, Carsten and K{\"u}chlin, Wolfgang},
+	journal={Software Testing, Verification and Reliability},
+	volume={19},
+	number={2},
+	pages={155--172},
+	year={2009},
+	publisher={Wiley Online Library}
+}
+
+@inproceedings{blast,
+	title={The Blast query language for software verification},
+	author={Beyer, Dirk and Chlipala, Adam J and Henzinger, Thomas A and Jhala, Ranjit and Majumdar, Rupak},
+	booktitle={International Static Analysis Symposium},
+	pages={2--18},
+	year={2004},
+	organization={Springer}
+}
+
+@misc{acsl,
+	title={ACSL: ANSI C Specification Language},
+	author={Baudin, Patrick and Filli{\^a}tre, Jean-Christophe and March{\'e}, Claude and Monate, Benjamin and Moy, Yannick and Prevosto, Virgile},
+	year={2008},
+	publisher={Octobre}
+}
+
 @book{IEEE-1363,
 	author =       {{IEEE Std 1363-2000}},
 	title =        {{IEEE} Standard Specifications for Public-Key Cryptography},

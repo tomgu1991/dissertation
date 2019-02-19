@@ -86,7 +86,7 @@ OpenSSL~\cite{openssl}是广泛应用的安全通信软件库。
 动检检测技术与静态检测技术相对，前者通过将程序执行以发现缺陷，后者则不需要执行程序。
 下面将通过这三个方面对API误用缺陷检测相关的现有研究进行总结。
 
-\paragraph{代码审查}
+\subsection{代码审查}
 代码审查（Code Review）是指开发人员通过系统地阅读程序源代码的API使用情况，以找出即修正在开发初期未发现的错误，提升软件质量的活动~\cite{code-review}。
 随着版本控制管理工具和开源社区的发展，通过在线软件库（例如Github~\cite{github}和Bitbucket~\cite{bitbucket}）可以允许开发者远程协同审查代码，简化了代码审查的代价。
 一项调研显示，在对于240个一线开发者的调研中，超过90\%的开发者所在的公司在使用代码审查技术以提高代码质量~\cite{17-profes-code-review}。
@@ -101,11 +101,11 @@ OpenSSL~\cite{openssl}是广泛应用的安全通信软件库。
 这些因素都制约了代码审查在当代软件开发环境中的效果。
 
 
-\paragraph{动态检测}
+\subsection{动态检测}
 动态程序检测技术（Dynamic Program Analysis）是程序分析技术的一种~\cite{15-pa}，通过程序的运行时行为检测程序的缺陷。
 动态程序检测技术在程序运行时，对程序的内部逻辑以及功能进行缺陷检测。
 因此检测结果的正确率可以达到100\%，即没有误报。
-针对接口使用缺陷检测，典型的动态检测技术是集成测试（Integration Testing）~\cite{02-icis-test}。
+针对接口使用缺陷检测，典型的动态检测技术是集成测试（Integration Testing）~\cite{02-icis-integration-testing}。
 该方法对已经通过测试的底层API实现模块组合后的代码进行测试，以检测API在组合时使用中的缺陷。
 通过构造输入和输出，动态的执行模块以检测程序中API使用的正确性。
 近年来，动态验证技术（Runtime Verification）获得广泛的应用~\cite{18-rv}。
@@ -114,8 +114,8 @@ OpenSSL~\cite{openssl}是广泛应用的安全通信软件库。
 插桩通过对源代码或者二进制代码进行语句或者指令的改写，以在运行时输出或者获得程序的状态。
 基于获得的程序状态和日记，通过分析技术对程序的运行状态进行查找。
 当程序崩溃或者违反预先定义的程序属性时，则找到缺陷。
-例如：AddressSanitizer~\cite{12-act-AddressSanitizer}是由谷歌公司开发的针对内存缺陷检测的工具。
-该工具已经集成在Clang、GCC和Xcode编译器中，找到了数百个实际缺陷~\cite{AddressSanitizerFoundBugs}。
+例如：AddressSanitizer~\cite{12-atc-AddressSanitizer}是由谷歌公司开发的针对内存缺陷检测的工具。
+该工具已经集成在Clang~\cite{clang}和GCC~\cite{gcc}编译器，与Xcode~\cite{Xcode}开发环境中，找到了数百个实际缺陷~\cite{AddressSanitizerFoundBugs}。
 
 
 动态检测技术具有高精度、跨函数的特点。能够找到跨越多个函数、复杂的API误用缺陷。同时，其复杂度与程序的规模呈线性关系，即运行时间不会随着程序规模变化而产生巨大开销。
@@ -133,19 +133,47 @@ OpenSSL~\cite{openssl}是广泛应用的安全通信软件库。
 例如：对于硬件检测的异常处理API，需要在特定的环境下才会触发。
 这些测试环境的准备需要大量的人力财力。
 
-\paragraph{静态检测}
+\subsection{静态检测}
+静态检测技术（Static Program Analysis）~\cite{08-ieee-static}与动态检测技术相对，在不执行程序的情况下对程序中缺陷进行检测。
+针对于接口误用缺陷检测，静态检测技术有三类常用方法：
+验证技术、静态分析技术和数据挖掘技术。
 
-{验证技术}
+\paragraph{验证技术}
+程序验证技术通过遍历程序的所有可能状态以证明程序的正确性或给出反例~\cite{08-tcad-sv}。
+针对于接口误用缺陷检测，静态程序验证技术本身难以直接对缺陷进行检测，需要将检测问题转化为可达性问题~\cite{rp}。
+检测工具需要提供或内部集成相应API正确使用的规约条件，并将规约条件与程序状态相对应。
+当发现到达违反规约条件的程序状态时，则认为检测到API误用缺陷。
 
-{静态分析技术}
+最具代表的接口缺陷验证工具是微软公司的SLAM项目~\cite{slam}。
+SLAM项目成立于2001年，旨在检测软件接口使用行为是否满足约束条件，以辅助开发者正确的使用接口的功能。
+开发者通过使用SLIC规约描述语言~\cite{01-slic}对程序接口的属性进行描述，并使用Static Driver Verifier（SDV）~\cite{02-acm-slam}工具对目标API进行检查。
+SDV通过对源代码的进行解析并根据SLIC规约对代码进行插桩，并利用反例引导的抽象解释技术（CounterExample-Guided Abstraction Refinement）~\cite{00-cav-counter,02-acm-abs}对API误用缺陷进行查找。
+至2010年，该项目已经积累200余API使用规约，成功检测Windows操作系统的驱动程序中270个API误用缺陷，有效的提高了接口使用的正确性~\cite{10-cad-slam, 11-acm-slam}。
+Avinux~\cite{09-avinux}静态验证工具集针对操作系统内核，扩展了SLIC描述语言。
+该工具利用能够对单个预处理的源代码文件进行缺陷检测。
+此外，针对操作系统的驱动程序，DDVerify~\cite{07-ase-ddverify}针对操作系统的驱动程序进行了场景建模，并对其中的四种场景进行验证。
+其他的通用验证工具也能够支持部分API误用缺陷类型，例如
+CPAchecker~\cite{07-cav-cpachecker}、CBMC~\cite{14-tacas-cbmc}、SMACK~\cite{14-cav-smack}等。
 
-{数据挖掘技术}
-静态
 
-动静结合
+尽管程序验证技术能够检测API误用缺陷，其面临如下不足。
+（1）规约描述语言（Behavior Specification）能够有效的描述接口使用的约束条件。
+然而，现有的描述语言多针对接口的功能实现~\cite{blast, acsl}。
+虽然SLIC是针对接口使用设计，但是该语言针对于Windows驱动程序设计，难以应用于普适性的接口误用缺陷检测。
+同时该语言使用复杂，需要较强的理解以设计相应的规约条件。
+（2）尽管验证技术能够实现可靠甚至完备的程序正确性分析，然而该技术的可延展性难以满足现实开发者的需求。
+目前，状态空间爆炸问题（state space explosion problem）是验证技术难以应用的最重要的挑战之一。
+\paragraph{静态分析技术}
+	
+\paragraph{数据挖掘技术}
+	静态
+	
+	动静结合
+	
+	总结：
+	每一项的不足
 
-总结：
-每一项的不足
+
 
 \section{研究思路}
 整体思路图（cxP13）
