@@ -111,7 +111,22 @@ SSLINT~\cite{15-sp-sslint}针对于SSL的若干API设计。
 过去的二十年内，研究人员针对于接口使用从不同的角度开展了大量的调研工作
 ~\cite{16-icse-cry,17-tse-survey, 12-fse-parallel,12-fse-deprecation,
 	18-sqj-evolution,11-etaps-doc, 15-ese-evolution, 11-ese-learning, 15-tse-change,13-etaps-mapping}。
-Zhong~\cite{17-tse-survey}针对于不同类型的API的使用情况进行了调研分析，
+一方面，研究人员从API本身入手，对API文档~\cite{12-fse-deprecation, 18-sqj-evolution,11-etaps-doc}、
+API演化~\cite{15-ese-evolution,15-tse-change}等进行分析；
+另一方面，则从使用者的角度，对API使用中的问题进行分析~\cite{16-icse-cry,17-tse-survey,12-fse-parallel,11-ese-learning,13-etaps-mapping}。
+
+随着软件库的更新，新的API用来替换有问题的API，
+以增加稳定性、提升效率。
+使用这些过期的API，则导致API误用。
+Robbes~\cite{12-fse-deprecation, 18-sqj-evolution}针对使用过期API带来的影响，
+在超过2600个系统中分析了577个不同的API。
+其结果显示，虽然只有14\%的API在升级后会影响其他的系统，
+然而这些改变会带来极大地影响。
+其中最多的能够涉及到80个开发者，120个项目。
+然而，很多开发者对此并没有作出相应的应对措施，
+降低系统的可靠性。
+
+从使用的角度，Zhong~\cite{17-tse-survey}针对于不同类型的API的使用情况进行了调研分析，
 总结出9个与API使用相关的发现，
 以改进、设计更好的规约挖掘技术。
 特别地，该论文指出，在对API的使用进行规约描述时，
@@ -126,17 +141,6 @@ Okur~\cite{12-fse-parallel}对655个开源项目中并行计算库中的API使�
 该研究针对100个StackOverflow的问题与回答讨论、100个Github上的开源项目和48个实际开发者进行调研。
 其结果显示，尽管开发者认为这些API使用难度大，但是他们依旧坚信能够正确使用这些API。
 但是，加密算法相关API误用却普遍存在~\cite{13-ccs-misuse}。
-
-随着软件库的更新，新的API用来替换有问题的API，
-以增加稳定性、提升效率。
-使用这些过期的API，则导致API误用。
-Robbes~\cite{12-fse-deprecation, 18-sqj-evolution}针对使用过期API带来的影响，
-在超过2600个系统中分析了577个不同的API。
-其结果显示，虽然只有14\%的API在升级后会影响其他的系统，
-然而这些改变会带来极大地影响。
-其中最多的能够涉及到80个开发者，120个项目。
-然而，很多开发者对此并没有作出相应的应对措施，
-降低系统的可靠性。
 
 Robillard~\cite{11-ese-learning}从使用者的角度对API的使用进行调研。
 通过多阶段的调研问卷与面对面的对面，
@@ -155,7 +159,48 @@ Nadi对加密算法相关的API使用情况进行分析。
 
 
 \paragraph{规约描述语言}
-通用语言
+软件行为规约（behavorial specification）是对软件系统或者组件预期行为的精确描述。
+独立的代码实现并不能很好地描述其意图，
+所以规范记录下来的信息对于软件维护有着重要的作用，
+能够有效的记录API开发者和使用者之间的协议~\cite{92-ieee-contract}。
+特别地，形式化的规约描述语言能够消除自然语言的歧义。
+规约能够在软件的整个开发周期使用。
+一方面，开发人员可以根据规约进行研发内部功能。
+另一方面，测试人员能够在调试的阶段根据规范去分离错误和划分责任~\cite{05-vstte-spec}。
+近三十年来，研究人员针对不同的语言和目标，设计了各种各样的BISL~\cite{survey12}。
+例如，针对通用属性检测的BLAST~\cite{blast}、ACSL~\cite{acsl}，
+针对SSL安全的SSLINT~\cite{15-sp-sslint}、Windows内核驱动程序的SLIC~\cite{01-slic}、异常处理检测~\cite{16-sec-epex}等等。
+
+
+BLAST~\cite{blast}由Dirk Beyer教授提出，用于BLAST自动化验证工具，面向时序安全属性的规约描述语言。
+该语言从两个不同的精度水平对程序的属性进行描述。
+微观来说，该语言能够通过描述检测自动机（monitor automata）的内部转移，
+以在程序的运行时刻轨迹上对程序时序属性进行分析。
+宏观来讲，该语言通过撰写可达性查询语句，
+对程序的状态与位置进行查询。
+通过两个精度水平的描述，能够有效的将验证问题转化到多个独立的模型检测引擎中，
+以降低验证工作的复杂性。
+
+ACSL（ANSI/ISO C Specification Language）是Frama-C~\cite{16-rv-framac}代码分析平台用来形式化定义C程序属性的规约描述语言。
+该语言通过注释的方式对程序中属性进行描述，以辅助验证工具对代码的实现进行检测。
+ACSL注重函数合约（function contract），
+即函数的参数与函数执行后需要满足的性质。
+其中，前者也被称作前置条件（pre-condition）；后者被称作后置条件（post-condition）。
+特别地，前置条件多针对于API使用者，即在调用目标API之前需要满足的约束。
+ACSL以代码注释的形式撰写，因此，为了利用ACSL，
+验证工具需要理解ACSL的语义，同时将ACSL与目标C程序的源代码进行转化。
+
+
+针对C程序接口使用规约，现有的规约描述语言存在若干不足。
+一方面，通用语言针对多种程序属性设计，语法结构多样，语义丰富。
+这种特点有利于描述接口的实现。
+接口使用多含有复杂的程序结构，设计多个API的协同使用。
+因此通用语言描述使用规约复杂。
+另一方面，现有的领域特定的规约描述语言多针对某个接口使用特性，
+难以扩展到普适性的接口使用规则。
+例如SLIC语言能够有效的应用于Windows操作系统的驱动程序，
+却难以应用于SSL安全裤中的API。
+
 
 特殊应用语言
 
