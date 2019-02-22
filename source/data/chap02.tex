@@ -213,12 +213,91 @@ Epex中对API的返回值的规约条件进行描述，
 
 \section{接口缺陷分类}
 \label{sec:2.3}
-(compsac19)
+为了能够在实践中，更加有效的解决API误用缺陷问题，
+对API误用缺陷的特点进行深入研究，
+以总结API误用缺陷类型具有重要意义。
+IEEE组织在1993发布了IEEE-1044软件异常分类，并在2009年更新~\cite{09-ieee-classification}。
+基于该标准的内容，IBM公司提出了Orthogonal Defect Classification（ODC）分类标准~\cite{92-tse-odc}。
+ODC基于缺陷类型（defect type）对缺陷进行分类，
+即通过代码结构的组成，例如函数、检测、赋值、文档等等。
+一个缺陷类型具体可以表现为两种异常类型（violation type），
+即缺失或者误用。
+最近，Beller~\cite{16-saner-evaluation}基于ODC提出了General Defect Classification（GCD），
+以更加精确的比较静态分析技术的检测能力。
+然而现有的缺陷分类方式，一方面没有对所有的软件缺陷进行描述，无法涵盖所有的缺陷域；
+另一方面缺少对API误用缺陷的详细分类情况。
+
+过去的十几年内，研究人员对不同的接口缺陷进行过检测。
+例如，Monperrus~\cite{13-tosem-missing-call}的研究指出，
+缺失必要的API调用普遍存在于缺陷跟踪系统、论文和源代码以及代码的注释中。
+Thummalapenta~\cite{09-icse-exception}针对API调用前需要满足的前置条件进行研究。
+Wasylkowski~\cite{07-fse-object}则对接口调用的顺序错误进行检测。
+然而，这些研究都只针对接口缺陷中的某一个特定的种类。
+Adama~\cite{survey18}在其研究结果中，针对Java程序提出了API-Misuse Classification（MUC），
+以对API误用缺陷进行分类、比较现有工具的检测能力。
+该分类基于API使用元素与缺陷表现类型进行分类。
+本文针对C程序的API缺陷进行研究，C程序与Java程序存在巨大设计理念差异。
+该结果难以直接应用于本文研究内，但是对本文的研究就有重要参考意义。
+另一方面，研究人员从API使用本身入手，
+调研并给出针对于API使用说明（directive）的分类~\cite{09-icse-doc,12-ese-directive}。
+API使用说明，是API文档中的一段自然语言描述，
+用来提醒开发在使用API时需要注意的约束条件。
+当这些约束条件被使用者忽略或者违反时，我们可以认为使用者产生了一个API误用缺陷。
+然而只用部分说明可以直接对应于误用缺陷，其他的则更注重API的使用。
+例如：明确的说明API的参数可以为空，这是针对API使用中不同方式的引导。
+不过这些调研结果可以作为本文的重要参考内容。
+
+
+据本文作者调研结果显示，目前，并没有工作对C程序接口缺陷的问题域进行定义或描述。
+研究人员难以对现有研究进行系统的了解与总结。
+特别是，哪些API缺陷种类已经被研究过、哪些没有被研究过，
+以及现有的方法能够解决多少问题、方法之前的效果比较。
+因此，为了更好的应对C程序API误用缺陷，
+我们需要一个具有针对性、来源于实际程序的缺陷类别。
+本节剩余部分将对数据收集、分类结果进行详细描述，
+并对接口缺陷分类调研结果进行讨论。
+
 \subsection{数据收集}
+本小结中，我们将针对数据收集的主要步骤进行详细描述，
+包括研究目标、缺陷收集方法和缺陷分析方法。
+
+\paragraph{研究目标}
+当代软件开发模式多利用开源社区已有的实现进行封装，
+因此对开源软件的研究更加迫切。
+为了能够更好地理解现实中C程序API误用缺陷的特点、以及开发者如何对这些缺陷进行修复，
+我们对不同领域、广泛使用的六个开源软件进行分析。
+包括：
+\begin{enumerate}
+	\item Linux内核~\cite{linux}：
+	
+	\item OpenSSL~\cite{openssl}：
+	
+	\item FFmpeg~\cite{ffmpeg}：
+	
+	\item Curl~\cite{curl}：
+	
+	\item FreeRDP~\cite{freerdp}：
+	
+	\item Httpd~\cite{httpd}：
+\end{enumerate}
+
+这些软件涵盖不同的领域：操作系统（Linux内核），开源API库（OpenSSL和FFmpeg）,
+Ubuntu应用软件（Curl，FreeRDP和Httpd）。
+同时他们具有五年以上的历史，并且现在依旧活跃与开源社区、
+被应用人员广泛使用。
+同时，这些项目都在Github网站上开源、具有完整的修改记录和缺陷跟踪系统。
+
+
+
+\paragraph{缺陷收集方法}
+
+\paragraph{缺陷分析方法}
+
 \subsection{分类结果}
+
 \subsection{讨论}
 
-\section{规约描述语言}
+\section{规约描述语言IMSpec}
 \label{sec:2.4}
 \subsection{设计动机}
 \subsection{语法}
