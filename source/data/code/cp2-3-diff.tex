@@ -1,0 +1,37 @@
+\begin{figure}
+	\centering
+\begin{lstlisting}
+drivers/net/wireless/ti/wl18xx/main.c
+=======================================================
+lhs: 100644 | d1aa3eee0e81f8cc7612eddabc4cf630dbbd1e79
+rhs: 100644 | 0cf3b4013dd646104b1f153c3d8a191f12a5dba8
+@@ -793,9 +793,13 @@ static int wl18xx_set_clk(struct wl1271 *wl)
+ret = wl18xx_top_reg_write(wl, PLLSH_WCS_PLL_P_FACTOR_CFG_2,
+	(wl18xx_clk_table[clk_freq].p >> 16) &
+	PLLSH_WCS_PLL_P_FACTOR_CFG_2_MASK);
++		if (ret < 0)
++			goto out;
+} else {
+ret = wl18xx_top_reg_write(wl, PLLSH_WCS_PLL_SWALLOW_EN,
+	PLLSH_WCS_PLL_SWALLOW_EN_VAL2);
++		if (ret < 0)
++			goto out;
+}
+
+/* choose WCS PLL */
+@@ -819,8 +823,6 @@ static int wl18xx_set_clk(struct wl1271 *wl)
+/* reset the swallowing logic */
+ret = wl18xx_top_reg_write(wl, PLLSH_COEX_PLL_SWALLOW_EN,
+	PLLSH_COEX_PLL_SWALLOW_EN_VAL2);
+-	if (ret < 0)
+-		goto out;
+
+out:
+return ret;
+
+\end{lstlisting}
+	\caption{
+	Linux内核修改sha：059c98599的差异性报告。
+	}
+	\label{fig:2-3-diff}
+\end{figure}
