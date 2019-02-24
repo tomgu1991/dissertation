@@ -1,0 +1,28 @@
+\begin{table}[b]
+	\centering
+	\begin{minipage}[t]{\linewidth} % 如果想在表格中使用脚注，minipage是个不错的办法
+		\caption{API误用缺陷实例统计信息}
+		\label{tab:2-3-root-causes}
+		\begin{tabular}{cccccccccc}
+			\hline
+			\multirow{2}{*}{项目名称} & 实例 & \multicolumn{2}{c}{IPU}& \multicolumn{2}{c}{IEH}& \multicolumn{2}{c}{ICC}& \multicolumn{2}{c}{其他}\\
+			\cline{3-10}
+			& 个数 & 数量 & 百分比 & 数量& 百分比 & 数量& 百分比& 数量& 百分比 \\
+			\hline
+			Linux  & 283 & 43 & 15.1 & {96} & {33.92} & 77 & 27.21 & 67 & 23.67 \\
+			%\hline
+			OpenSSL  & 127 & 21 & 16.54 & 42 & 33.07 & {49} & {38.58} & 15 & 11.81 \\ 
+			%\hline
+			FFmpeg  & 126  &  18 & 14.29 & 43 & 34.13 & 52 & 41.27 & 13 & 10.32 \\
+			%\hline
+			Curl  & 134   & 23 & 17.16 & 38 & 28.36 & 57 & 42.54 & 16 & 11.94 \\ 
+			%\hline
+			FreeRDP   & 119 & 22 & 18.49 & 30 & 25.21 & 48 & 40.34 & 19 & 15.97 \\ 
+			%\hline
+			Httpd  & 41 & 8 & 19.51 & 8 & 19.51 & 16 & 39.02 & 9 & 21.95 \\ 
+			\hline
+			Total  & 830 & \multicolumn{2}{c}{135 (16.27\%)} & \multicolumn{2}{c}{257 (30.96\%)} & \multicolumn{2}{c}{299 (36.02\%)} & \multicolumn{2}{c}{139 (16.75\%)}\\ 
+			\hline
+		\end{tabular}
+	\end{minipage}
+\end{table}

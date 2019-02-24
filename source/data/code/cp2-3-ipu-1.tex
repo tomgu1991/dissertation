@@ -1,0 +1,44 @@
+\begin{figure}[b]
+	\centering
+\begin{lstlisting}
+"description": "Fixed API nonnull warning."
+"date": "2014-11-17 00:00:09"
+"author": "Armin Novak"
+libfreerdp/core/gateway/http.c
+=======================================================
+lhs: 100644 | 4cef378c8cafdc4ad4a237f88a092c511c250ffa
+rhs: 100644 | 51c5c04dc257975756a4ee3ded16cae493dea95c
+@@ -330,10 +330,12 @@ void http_request_free(HttpRequest* http_request)
+
+BOOL http_response_parse_header_status_line(HttpResponse* http_response, char* status_line)
+{
+-	char* separator;
++	char* separator = NULL;
+char* status_code;
+char* reason_phrase;
+-	separator = strchr(status_line, ' ');
++
++	if (status_line)
++		separator = strchr(status_line, ' ');
+
+if (!separator)
+	return FALSE;
+@@ -433,7 +435,10 @@ BOOL http_response_parse_header(HttpResponse* http_response)
+*                 |     |
+*         colon_pos     value
+*/
+-		colon_pos = strchr(line, ':');
++		if (line)
++			colon_pos = strchr(line, ':');
++		else
++			colon_pos = NULL;
+
+if ((colon_pos == NULL) || (colon_pos == line))
+	return FALSE;
+
+\end{lstlisting}
+	\caption{
+	FreeRDP中空指针引用导致的IPU-API误用缺陷（sha：9e5be6f7e8）。
+	}
+	\label{fig:2-3-ipu-1}
+\end{figure}

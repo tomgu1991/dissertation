@@ -262,29 +262,7 @@ API使用说明，是API文档中的一段自然语言描述，
 包括研究对象、缺陷实例收集方法和缺陷分析方法。
 
 \paragraph{研究对象}
-
-\begin{table}[b]
-	\centering
-	\begin{minipage}[t]{0.9\linewidth} % 如果想在表格中使用脚注，minipage是个不错的办法
-		\caption{API误用缺陷研究对象。}
-		\label{tab:2-3-target}
-		\begin{tabular}{lp{3cm}<{\centering}p{3cm}<{\centering}p{4cm}<{\centering}}
-			\hline
-			{\heiti 研究对象} & 
-			\multicolumn{1}{c}{\heiti 关注数\footnote{本文选取Github上Watch和Star中较多者。}} &
-			\multicolumn{1}{c}{\heiti 提交次数} & 
-			\multicolumn{1}{c}{\heiti 可用时间\footnote{Github上可以追溯的代码修改时间。}} \\
-			\hline
-			Linux内核   & 69,697 & 812,391 & 20050416-至今\\
-			OpenSSL   & 9,510 & 23,412 & 19981221-至今\\
-			FFmpeg   & 13,907 & 93,218 & 20001220-至今\\
-			Curl   & 24,009 & 12,130 & 19991229-至今\\
-			FreeRDP   & 2,959 & 13,030 & 20110630-至今\\
-			Httpd   & 2,028 & 31,341 & 19960703-至今\\
-			\hline
-		\end{tabular}
-	\end{minipage}
-\end{table}
+\input{data/tab/cp2-3-target}
 
 当代软件开发模式多利用开源社区已有的实现进行封装，
 因此对开源软件的研究更加迫切。
@@ -355,33 +333,8 @@ Ubuntu应用软件（Curl，FreeRDP和Httpd）。
 方便读者进行扩展，或者研究其他领域问题。
 
 \paragraph{缺陷实例收集}
-\begin{table}[t]
-	\centering
-	\begin{minipage}[t]{0.9\linewidth} % 如果想在表格中使用脚注，minipage是个不错的办法
-		\caption{API误用缺陷研究对象}
-		\label{tab:2-3-statistics}
-			\begin{tabular}{crcrrr}
-			\hline
-			\multirow{2}{*}{项目名称} & \multirow{2}{*}{Loc} & 研究 & \multicolumn{1}{c}{修改}& \multicolumn{1}{c}{缺陷}& \multicolumn{1}{c}{API误用}\\
-			&  & 时间 & \multicolumn{1}{c}{总数} & \multicolumn{1}{c}{数目}& \multicolumn{1}{c}{数目} \\
-			\hline
-			Linux & 12.96M & 20170901-20171231 & 24651 & 6401 & 868 \\
-			%\hline
-			OpenSSL & 454K & 20150701-20171231 & 7564 & 2391 & 529 \\
-			%\hline
-			FFmpeg & 915K & 20160701-20171231 & 8162 & 2783 & 610 \\
-			%\hline
-			Curl & 113K & 20130101-20170630 & 7082 & 2043 & 499 \\
-			%\hline
-			FreeRDP & 259K & 20130701-20171231 & 7565 & 3535 & 495 \\
-			%\hline
-			Httpd & 203K & 20130701-20171231 & 6072 & 1323 & 149 \\
-			\hline
-			Total & 14.90M & - & 61096& 18476 & 3150 \\
-			\hline
-		\end{tabular}
-	\end{minipage}
-\end{table}
+\input{data/tab/cp2-3-statistics}
+
 
 \input{data/code/cp2-3-description}
 \input{data/code/cp2-3-diff}
@@ -438,35 +391,7 @@ Ubuntu应用软件（Curl，FreeRDP和Httpd）。
 该描述中包含了“fix API”关键词，然而，该修改针对于编译错误。
 因此，我们认为，通过以上方法，能够有效的在修改记录中获取API误用缺陷实例。
 
-\begin{table}[b]
-	\centering
-	\begin{minipage}[t]{0.75\linewidth} % 如果想在表格中使用脚注，minipage是个不错的办法
-		\caption{API误用缺陷实例统计信息}
-		\label{tab:2-3-studied}
-		\begin{tabular}{cccccc}
-			\hline
-			\multirow{2}{*}{项目名称} & \multirow{2}{*}{缺陷总数} & \multicolumn{2}{c}{API误用}& \multicolumn{2}{c}{研究实例}\\
-			\cline{3-4}\cline{5-6}
-			&  & 数量 & 百分比（\%）\footnote{与缺陷总数的百分比} & 数量& 百分比（\%）\footnote{与API误用缺陷总数的百分比} \\
-			\hline
-			Linux & 6401 & 868 & 13.56 & 283 & 32.60 \\
-			%\hline
-			OpenSSL & 2391 & 529 & 22.12 &127  & 24.00 \\
-			%\hline
-			FFmpeg & 2783 & 610 & 21.92 & 126 & 20.66 \\
-			%\hline
-			Curl & 2043 & 499 & 24.42 & 134 & 26.85 \\
-			%\hline
-			FreeRDP & 3535 & 495 & 14.00 & 119 & 24.04 \\
-			%\hline
-			Httpd & 1323 & 149 & 11.26 & 41 & 27.52 \\
-			\hline
-			Total & 18476 & 3150 & 17.05 & 830 & 26.35 \\
-			\hline
-		\end{tabular}
-	\end{minipage}
-\end{table}
-
+\input{data/tab/2-3-studied}
 
 在预实验阶段，我们发现，由于缺少领域知识、对API掌握熟练度不足、以及缺陷的复杂性，
 基于我们的统计，平均每个缺陷的理解时间在3.5小时。
@@ -481,7 +406,7 @@ Ubuntu应用软件（Curl，FreeRDP和Httpd）。
 \paragraph{缺陷分析}
 基于上述步骤收集的的缺陷实例，我们通过对修改说明文件的内容、差异性报告以及
 源代码文件对缺陷进行理解。
-包括：误用的上下文信息、根本原因、修复的模式。
+包括：误用的在上下文语义中的根本原因、修复的模式以及误用的其他统计信息。
 特别地，为了能够理解API误用缺陷的本质，
 我们关注API误用的根本原因，即在API使用的整个代码片段中，哪一部分的错误导致API误用。
 
@@ -494,11 +419,106 @@ Ubuntu应用软件（Curl，FreeRDP和Httpd）。
 缺陷的根本原因则是没有对该函数进行异常处理；
 修复的模式则相对简单，进行检查，并添加跳转语句。
 
+\input{data/tab/cp2-3-root-causes}
+\subsection{调研结果}
+如表~\ref{tab:2-3-studied}所示，
+在18476个缺陷修复实例中，有3150个与API修复有关，
+平均百分比为17.05\%。
+其中Curl占比例最多，为24.42\%；
+Httpd最少，为11.26\%。
+在上文中，我们介绍了预实验的方法和结果，
+即预实验中，平均92.22\%的API误用缺陷为真正例（True Positive，TP）。
+因此，我们相信，API误用缺陷并不是开发阶段发生的偶然事件。
+其具有普遍性。
+
+\vspace*{10pt}
+\begin{center}
+\noindent\shadowbox{
+	\centering
+	\begin{minipage}{0.85\textwidth}
+		{\kaishu 发现1：API误用缺陷并不是偶然现象，具有普遍性。
+			调研结果显示，平均17.05\%的缺陷修复相关的代码修改与API误用相关。}
+	\end{minipage}
+}
+\end{center}
+
+为了能够理解API误用缺陷的本质原因，我们对随机选取的830缺陷实例进行分析，
+包括出错的根本原因、误用缺陷的修复模式以及API误用重复发生的统计信息。
+在下文中，我们对调研的结果进行仔细分析。
+
+\paragraph{根本原因}
+
+在对所有的目标用例分析后，我们将统计结果总结于表~\ref{tab:2-3-root-causes}。
+虽然每个项目中，出错的根本原因的分布不同。
+但是我们可以总结出三大类C程序接口误用缺陷：
+不正确的参数使用（Improper Parameter Using, IPU）、
+不正确的异常处理（Improper Error Handling, IEH）、
+不正确的因果调用关系（Improper Causal Calling, ICC）。
+下文中我们通过缺陷实例对这些缺陷类型进行讲解。
+
+\input{data/code/cp2-3-ipu-1}
+
+\vspace*{10pt}
+\noindent{\textbf{IPU}}：软件库的开发者通过将API的方式，
+以实现对特定功能封装，达到软件复用的作用。
+然而，开发者在使用这些API的时候，需要满足特定的条件，
+以保证API使用时的上下文环境正确。
+这些API使用前需要满足的条件，亦被称作前置条件（pre-condition）~\cite{14-fse-pre}。
+
+例如，一个API的参数中包含指针类型，那么，
+通常情况下在调用该API之前，保证该指针类型不为空指针NULL。
+然而，我们发现API的使用者经常忽略这些约束条件，
+导致空指针解引用错误。
+图~\ref{fig:2-3-ipu-1}给出了一个FreeRDP中的缺陷修改记录。
+函数\texttt{strchr(str, c)}用来搜索字符串\texttt{str}中，
+第一次出现字母\texttt{c}的位置。
+其中\texttt{str}是一个指向字符串的指针。
+在FreeRDP的http.c文件中定义的函数\texttt{http\_response\_parse\_header\_status\_line()}中，
+将来自外部输入的参数\texttt{status\_line}，
+作为参数传递给\texttt{strchr}。
+然而在调用\texttt{strchr}之前（16行与27行），并没有对该参数进行非空指针的检查。
+如果该参数为空指针，
+则会产生一个API误用缺陷错误。
+为了避免该缺陷，开发者增加了参数非空检查的条件判断，如图中18-19行与28-31行所示。
 
 
+\input{data/code/cp2-3-ipu-2}
+此外，函数参数的关系、参数与返回值的关系也需要给考虑。
+最典型的就是C标准库中内存操作相关的API。
+例如，\texttt{memcpy(d, s, n)}函数用来从源头内存区间\texttt{s}中，
+拷贝\texttt{n}个字符到目标内存区间\texttt{d}。
+因此，该函数在使用的时候，目标内存区间\texttt{d}的大小要大于或者等于拷贝长度\texttt{n}。
+否则将产生一个内存越界错误。
+另一方面，参数与返回值之间也可能存在语义关联关系。
+比如函数\texttt{size t write(int fd, void* buf, size t cnt)}，
+从参数\texttt{buf}指向的内存区域内，读取\text{cnt}个字符到参数\texttt{fd}所标志的文件或者网络链接（socket）。
+该函数的返回值记录了实际输出了多少个字节。
+特别地，\texttt{write()}的返回值为负数时，则表明该函数发生错误。
+因此如果需要确保\texttt{cnt}个字节被写入到目标地址时，
+保证软件的鲁棒性，
+需要检查该值与函数的返回值之间的关系。
+然而如图~\ref{fig:2-3-ipu-2}中13行所示，
+FFmpeg项目中libxvid\_rc.c文件在调用该函数后并有对返回值与参数进行比对，
+违反了API参数与返回值之间的约束关系。
+为了避免该错误，开发者增加了返回值与参数之间的约束关系，如图中14-17行所示。
+
+\vspace*{10pt}
+\begin{center}
+	\noindent\shadowbox{
+		\centering
+		\begin{minipage}{0.85\textwidth}
+			{\kaishu 发现2：在所有被研究的API误用缺陷实例中，14.29-19.51\%的缺陷原因是
+				不正确的参数使用（Improper Parameter Using，IPU）,
+				包括缺失或者错误地对单个参数、参数之间以及参数和返回值之间的约束检查。
+			}
+		\end{minipage}
+	}
+\end{center}
+
+\paragraph{修复模式}
 
 
-\subsection{结果}
+\paragraph{误用重复性}
 
 \subsection{讨论}
 
