@@ -1,0 +1,36 @@
+\begin{figure}[b]
+	\centering
+\begin{lstlisting}
+"hash": "086ad79970f3cd0463558bfb69122f6acdc9d2da",
+"summary": "ldap: check Curl_client_write() (*@\textcolor{black}{return}@*) codes",
+"date": "2014-12-10 00:41:32",
+"author": "Daniel Stenberg",
+ib/ldap.c
+=======================================================
+lhs: 100644 | 14437c3b54715cb5ad161d78ee7b89a412b64a9d
+rhs: 100644 | 96521bf21862540e32368e229365ed49d6f43cff
+---@@ -384,9 +384,17 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
+char  *dn = ldap_get_dn(server, entryIterator);
+int i;
+
+-    Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+-    Curl_client_write(conn, CLIENTWRITE_BODY, (char *)dn, 0);
+-    Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
++    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
++    if(result)
++      goto quit;
++
++    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)dn, 0);
++    if(result)
++      goto quit;
++
++    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
++    if(result)
++      goto quit;
+
+\end{lstlisting}
+	\caption{
+	Curl中忘记对错误状态代码检查的IEH-API误用缺陷（sha：086ad79970）。
+	}
+	\label{fig:2-3-ieh-1}
+\end{figure}

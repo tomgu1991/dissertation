@@ -1,0 +1,26 @@
+\begin{figure}[b]
+	\centering
+\begin{lstlisting}
+"hash": "520833cbe1601feed1c6473bd28c4c894e7ee63e",
+"summary": "ossl_recv: SSL_read() returning 0 is an error too",
+"date": "2013-05-22 23:42:33",
+"author": "Mike Giancola",
+lib/ssluse.c
+=======================================================
+lhs: 100644 | 80fa119574f7940861e3ba855574ae59cd5cf833
+rhs: 100644 | 36c38042ac964669a6e3b8b21e1dc223dd65ab4b
+@@ -2595,7 +2595,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
+
+buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
+nread = (ssize_t)SSL_read(conn->ssl[num].handle, buf, buffsize);
+-  if(nread < 0) {
++  if(nread <= 0) {
+	/* failed SSL_read */
+	int err = SSL_get_error(conn->ssl[num].handle, (int)nread);
+
+\end{lstlisting}
+	\caption{
+	Curl中忘记对错误状态代码检查的IEH-API误用缺陷（sha：086ad79970）。
+	}
+	\label{fig:2-3-ieh-1}
+\end{figure}
