@@ -1,0 +1,51 @@
+\begin{figure}[t]
+	\centering
+\begin{lstlisting}
+"hash": "5625567f9c7daaa2e2689647e10e4c5d7370718f",
+"summary": "Fix another possible crash in rsa_ossl_mod_exp.",
+"date": "2017-06-14 09:35:48",
+"author": "Bernd Edlinger",
+crypto/rsa/rsa_ossl.c
+=======================================================
+lhs: 100644 | 5e0ad92cb1c3c4257f1fd21da0bfad4107d399e5
+rhs: 100644 | 92c4be1868a5b1608c1ab7841281014c1a51a692
+
+正确用法片段1
+// Line-96
+ret = BN_CTX_get(ctx);
+num = BN_num_bytes(rsa->n);
+buf = OPENSSL_malloc(num);
+if (f == NULL || ret == NULL || buf == NULL) {
+	RSAerr(RSA_F_RSA_OSSL_PUBLIC_ENCRYPT, ERR_R_MALLOC_FAILURE);
+	goto err;
+}
+
+正确用法片段2
+// Line-256
+f = BN_CTX_get(ctx);
+ret = BN_CTX_get(ctx);
+num = BN_num_bytes(rsa->n);
+buf = OPENSSL_malloc(num);
+if (f == NULL || ret == NULL || buf == NULL) {
+	RSAerr(RSA_F_RSA_OSSL_PRIVATE_ENCRYPT, ERR_R_MALLOC_FAILURE);
+	goto err;
+}
+
+错误用法以及修复
+@@ -608,6 +608,8 @@ static int rsa_ossl_mod_exp(BIGNUM *r0, const BIGNUM *I, RSA 
+vrfy = BN_CTX_get(ctx);
++    if (vrfy == NULL)
++        goto err;
+
+{
+BIGNUM *p = BN_new(), *q = BN_new();
+
+相同的错误
+7928e-crypto\dh\dh_key.c(2017-01-24, Bernd Edlinger)
+1ff74-crypto\dsa\dsa_gen.c(2016-09-21, Matt Caswell)
+\end{lstlisting}
+	\caption{
+	FreeRDP中忽略调用关系中参数和返回值的语义关系导致的ICC-API误用缺陷（sha：1845c0b590）。
+	}
+	\label{fig:2-3-dul}
+\end{figure}
