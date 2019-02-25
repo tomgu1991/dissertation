@@ -1,0 +1,35 @@
+\begin{figure}[t]
+	\centering
+\begin{lstlisting}
+"hash": "0426670f0a8ffa69df64a3babfb5caed522feb7f",
+"summary": "Check CA certificate in curl_darwinssl.c.",
+"date": "2014-09-01 00:34:37",
+"author": "Vilmos Nebehaj",
+lib/vtls/curl_darwinssl.c
+=======================================================
+lhs: 100644 | 9ba287d0e91ee470fad880a5aa7d7981a9cfdeb1
+rhs: 100644 | 3726357472fc3f5d01e6a5959a20c121ba6a0966
+@@ -1671,6 +1671,16 @@ static int append_cert_to_array(struct SessionHandle *data,
+	SecCertificateRef cacert =
+	SecCertificateCreateWithData(kCFAllocatorDefault, certdata);
+	...
+	
++    /* Check if cacert is valid. */
++    SecKeyRef key;
++    OSStatus ret = SecCertificateCopyPublicKey(cacert, &key);
++    if(ret != noErr) {
++      CFRelease(cacert);
++      failf(data, "SSL: invalid CA certificate");
++      return CURLE_SSL_CACERT;
++    }
++    CFRelease(key);
++
+CFArrayAppendValue(array, cacert);
+CFRelease(cacert);
+
+\end{lstlisting}
+	\caption{
+	Curl中对参数添加项目相关的参数检查（sha：0426670f0a）。
+	}
+	\label{fig:2-3-fix}
+\end{figure}

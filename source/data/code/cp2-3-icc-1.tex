@@ -1,0 +1,39 @@
+\begin{figure}[t]
+	\centering
+\begin{lstlisting}
+"hash": "0a618df059d93bf7fe9e3ec92e04db8bc1eeff07",
+"summary": "Fix a mem leak on an error path in OBJ_NAME_add()",
+"date": "2016-05-24 00:09:56",
+"author": "Matt Caswell",
+crypto/objects/o_names.c
+=======================================================
+lhs: 100644 | e43fb30a760464a6e1d45bbd9edfeec4ecedb25a
+rhs: 100644 | c655a908ddb8560cf76f73570a9f71d39d624d7d
+@@ -191,7 +191,7 @@ int OBJ_NAME_add(const char *name, int type, const char *data)
+onp = OPENSSL_malloc(sizeof(*onp));
+if (onp == NULL) {
+/* ERROR */
+-        return (0);
++        return 0;
+}
+
+onp->name = name;
+@@ -216,10 +216,11 @@ int OBJ_NAME_add(const char *name, int type, const char *data)
+} else {
+if (lh_OBJ_NAME_error(names_lh)) {
+/* ERROR */
+-            return (0);
++            OPENSSL_free(onp);
++            return 0;
+}
+
+-    return (1);
++    return 1;
+}
+
+\end{lstlisting}
+	\caption{
+	OpenSSL中忽略内存释放导致的ICC-API误用缺陷（sha：0a618df059）。
+	}
+	\label{fig:2-3-icc-1}
+\end{figure}

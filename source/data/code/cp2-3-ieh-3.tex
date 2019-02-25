@@ -1,0 +1,40 @@
+\begin{figure}[t]
+	\centering
+\begin{lstlisting}
+"hash": "1f152a42ae9c2985b8a0cedf90d3b63b2e64a898",
+"summary": "sspi: print out InitializeSecurityContext() error message",
+"date": "2017-04-07 08:49:20",
+"author": "Isaac Boukris",
+"parent_hash": "aa2e9e90173bb379ccff800c9019d6626b69c452"
+lib/vauth/spnego_sspi.c
+=======================================================
+@@ -224,6 +225,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
+nego->status = s_pSecFn->InitializeSecurityContext(...)
+...
+if(GSS_ERROR(nego->status)) {
++    failf(data, "InitializeSecurityContext failed: %s",
++          Curl_sspi_strerror(data->easy_conn, nego->status));
+return CURLE_OUT_OF_MEMORY;
+}
+
+
+"hash": "884a790e17a22eed42f1fe41ccaebd8c1fe18902",
+"summary": "Fix missing NULL checks in key_share processing",
+"date": "2016-11-23 22:39:27",
+"author": "Matt Caswell",
+ssl/t1_lib.c
+=======================================================
+@@ -1538,6 +1538,10 @@ static int add_client_key_share_ext(SSL *s, WPACKET *pkt, int *al)
+}
+skey = ssl_generate_pkey(ckey);
++    if (skey == NULL) {
++        SSLerr(SSL_F_ADD_CLIENT_KEY_SHARE_EXT, ERR_R_MALLOC_FAILURE);
++        return 0;
++    }
+...
+\end{lstlisting}
+	\caption{
+	Curl（sha：1f152a42ae）与OpenSSL（sha：884a790e17）中异常处理代码示例。
+	}
+	\label{fig:2-3-ieh-3}
+\end{figure}

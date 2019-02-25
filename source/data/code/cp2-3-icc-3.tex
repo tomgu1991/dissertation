@@ -1,0 +1,30 @@
+\begin{figure}[t]
+	\centering
+\begin{lstlisting}
+"hash": "d285b5418ee1ff361f06545e0489ece61bdd1a50",
+(*@\textcolor{black}{"summary": "Avoid a double-free in crl2pl7",}@*)
+"date": "2016-06-14 11:27:10",
+"author": "Matt Caswell",
+apps/crl2p7.c
+=======================================================
+lhs: 100644 | 1631258793ec96ae5d653be3b6ebb7bfa7f3c26d
+rhs: 100644 | 9c5f79f9f37988d0db709eda6eeaf82d44a1044a
+@@ -84,10 +84,8 @@ int crl2pkcs7_main(int argc, char **argv)
+
+
+if ((certflst == NULL) && (certflst = sk_OPENSSL_STRING_new_null()) == NULL)
+	goto end;
+-if (!sk_OPENSSL_STRING_push(certflst, opt_arg())) {
+-	sk_OPENSSL_STRING_free(certflst);
++if (!sk_OPENSSL_STRING_push(certflst, opt_arg()))
+	goto end;
+-}
+
+end:
+	sk_OPENSSL_STRING_free(certflst);
+\end{lstlisting}
+	\caption{
+	FreeRDP中忽略调用关系中参数和返回值的语义关系导致的ICC-API误用缺陷（sha：1845c0b590）。
+	}
+	\label{fig:2-3-icc-3}
+\end{figure}
