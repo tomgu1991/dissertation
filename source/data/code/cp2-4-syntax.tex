@@ -1,0 +1,64 @@
+\newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Int}{\mathbb{Z}}
+\newcommand{\ID}{\mathbb{ID}}
+\newcommand{\Cond}{\mathit{Cond}}
+\newcommand{\true}{\texttt{true}}
+\newcommand{\Pre}{\mathit{Pre}}
+\newcommand{\Post}{\mathit{Post}}
+\newcommand{\Return}{\mathit{Return}}
+\newcommand{\ReturnFun}[1]{\texttt{\textbf{RETURN}(}#1\texttt{)}}
+\newcommand{\Call}{\mathit{Call}}
+\newcommand{\CallFun}[1]{\texttt{\textbf{Call}(}#1\texttt{)}}
+\newcommand{\NULL}{\texttt{\textbf{NULL}}}
+\newcommand{\FunName}{\mathit{FunName}}
+\newcommand{\FunSig}{\mathit{FunSig}}
+\newcommand{\Action}{\mathit{Action}}
+\newcommand{\Arg}{\mathit{Arg}}
+\newcommand{\Opd}{\mathit{Opd}}
+\newcommand{\MemberOp}{\mathit{MemberOp}}
+\newcommand{\CmpOp}{\mathit{CmpOp}}
+\newcommand{\UnOp}{\mathit{UnOp}}
+\newcommand{\Set}{\mathit{Set}}
+\newcommand{\Type}{\mathit{Type}}
+\newcommand{\IN}{\texttt{IN}}
+\newcommand{\NOTIN}{\texttt{NOTIN}}
+\newcommand{\LEN}{\texttt{LEN}}
+\newcommand{\TYPE}{\texttt{TYPE}}
+\newcommand{\MEMTYPE}{\texttt{MEMTYPE}}
+\newcommand{\myid}{\mathit{id}}
+\newcommand{\Target}{\mathit{Target}}
+\newcommand{\Spec}{\mathit{Spec}}
+\newcommand{\Specs}{\mathit{Specs}}
+
+\begin{figure}[t]
+	\centering
+	{
+\begingroup
+\footnotesize
+\begin{IEEEeqnarray*}{rCl}
+\Specs & ::= & \Spec^* \\
+\Spec & ::= & \textbf{\texttt{Spec: }}\Target~\Pre~\Post\\
+\Target & ::= & \textbf{\texttt{Target: }} \FunSig \\
+\Pre & ::= & \textbf{\texttt{Pre: }} \Cond^+ \\
+\Post & ::= & \textbf{\texttt{Post: }} (\Cond \texttt{,} \Action^*)^+ \\
+\Cond & ::= & \true \mid \Opd~\CmpOp~\Opd \mid \Opd~\MemberOp~\texttt{(}\Set \texttt{)} \\
+\Action & ::= & \Return \mid \Call   \\
+\Return & ::= & \ReturnFun{n} \mid \ReturnFun{\NULL} \\
+\Call & ::= & \CallFun{\FunName \texttt{:} \Cond^*} \\
+\Opd & ::= & \Arg \mid \UnOp\texttt{(}\Arg\texttt{)} \mid \textbf{\NULL} \mid n\\
+% funName(type*) -> function may have no parameter
+\FunSig & ::= & \FunName \texttt{(} \Type^* \texttt{)}~\texttt{->}~ \Type \\  
+\Arg & ::= & \FunName \textbf{\texttt{\_arg\_}} i \\
+\UnOp & ::= & \textbf{\LEN} \mid \textbf{\TYPE} \mid \textbf{\MEMTYPE} \\
+\CmpOp & ::= & \textbf{\texttt{!=}} \mid \textbf{\texttt{==}} \mid \textbf{\texttt{>=}} \mid \textbf{\texttt{>}} \mid \textbf{\texttt{<=}} \mid \textbf{\texttt{<}} \\
+\MemberOp & ::= & \textbf{\IN} \mid \textbf{\NOTIN} \\
+\Set & ::= & \myid^+ \mid n^+ \\
+\FunName & ::= & \myid \\
+\Type & ::= & \myid
+\end{IEEEeqnarray*}
+	\endgroup
+	}
+	\setlength{\abovecaptionskip}{-10pt}
+	\caption{IMSpec语法结构}
+	\label{fig:2-4-syntax}
+\end{figure}

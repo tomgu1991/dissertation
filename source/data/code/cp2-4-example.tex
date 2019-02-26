@@ -1,0 +1,42 @@
+\begin{figure}[t]
+	\centering
+\begin{lstlisting}
+#define SUCCESS 1
+#define FILEERR -1
+#define IOERR -2		
+
+int foo(char *fileName){
+char buffer[100] = "";
+FILE *pFile;
+
+// 1. missing parameter validation, resulting NPD
++   if(fileName == NULL) return ERROR;
+pFile = fopen(fileName, "r");
+if (pFile == NULL){
+
+// 2.1 incorrect error propagation
+-       return IOERR
++       return FILEERR;
+}
+
+// 2.2 incorrect error code status checking
+-   if (fgets(buffer, 100, pFile) < 0){
++   if (fgets(buffer, 100, pFile) == NULL){
+goto err;
+}
+(*@\dots@*)
+fclose(pFile);
+return SUCCESS; 
+err:
+Log("Error read file");
+
+// 3. incorrect causal calling, resulting memory_leak
++   fclose(pFile);
+return IOERR;
+}
+\end{lstlisting}
+	\caption{
+	具有多种缺陷模式的接口缺陷样例。
+	}
+	\label{fig:2-4-example}
+\end{figure}

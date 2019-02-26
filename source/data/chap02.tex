@@ -1,4 +1,4 @@
-\chapter{接口使用规约描述语言研究}
+\chapter{接口使用规约描述方法研究}
 \label{cha:impsec}
 随着软件规模和复杂度的提升与开源社区的蓬勃发展，
 开发者经常利用现有的应用编程接口（API）来快速构建系统。
@@ -768,6 +768,22 @@ OpenSSL则是在29行，返回错误代码0。
 
 \section{规约描述语言IMSpec}
 \label{sec:2.4}
+如上所述，现代软件多基于程序接口API开发。
+在使用API时，需要满足接口使用规约以保证其正确的功能。
+开发者在提供API时，通常会提供基于自然语言描述的规约使用说明。
+然而，这些说明往往会被使用者忽略，导致API被误用。
+基于形式化的规约描述语言能够有效的描述API使用时的约束条件。
+尤其当描述语言基于程序语言的语法结构时，能够快速的被使用者接受。
+传统的静态分析工具将缺陷模型或程序属性编码在分析引擎中。
+这种策略能够有效解决预先定义的API，比如C语言的标准库。
+然而，对于用户自定义的API则支持不足。
+特别地，很多用户定义的API与C的标准库中的API存在一致的使用约束。
+为了能够支持对用户自定义API以及用户使用的第三方API的缺陷检测，
+作者基于~\ref{sec:2.3}节中总结的API误用缺陷模式，
+设计了面向C程序接口使用的领域特定语言IMSpec。
+IMSpec旨在通过轻量级、类程序语言结构的方式，描述API的使用约束条件，
+以帮助接口开发者和使用者明确使用约束条件、供检测工具对错误使用API导致的缺陷进行查找。
+
 \subsection{设计动机}
 During the analysis of the API-misuse bugs, we find that
 diverse APIs are created to encapsulate different functionalities
@@ -784,10 +800,63 @@ the automatic static analysis tool based on the assumption that
 a deviation from the most-frequent usage corresponds to a
 misuse will fail to validate these API usages.
 
-\subsection{语法}
-\subsection{语义}
-\subsection{应用案例}
+We aim at providing a purposespecific
+specification language to cover majority root causes of
+API misuse in a lightweight but precise specification language.
+Therefore, we designed IMSpec with the help of open-source
+community developers as well as the misuses in practice. In
+particular, we made the following major design decisions
+\begin{enumerate}
+	\item 白名单策略：For a given API, there are many ways to be
+	misused, but only a few correct usages. We decided to
+	use whitelisting in most places (i.e., specifying the usage
+	constraints explicitly, otherwise to be incorrect).
+	\item 数据流分析：Data-flow properties are important in
+	reasoning for the API usages. Many misuses occur when
+	developers forget to treat data consistently (e.g., missing
+	release resource when a pointer has been assigned to another
+	location or in all error handling paths).
+	\item API领域特定元素：To provide a simple but powerful
+	specification language for API misuse detection, special
+	elements have to be created, especially properties that are
+	difficult to depict by the syntax of C code (e.g., free memory
+	on heap).
+	\item 工具无关的语义：We equipped IMSpec with
+	tool-independent semantics, which will enable us and others
+	to build more effective tools for diverse purposes (e.g., documentation,
+	test generation, code instructions for dynamic
+	checkers to identify misuses at runtime)
+\end{enumerate}
 
+\subsection{语法}
+The abstract syntax of IMSpec is shown in
+Figure 2. An IMSpec rule instance is defined on the level of
+individual usage of a single API. Therefore, the rule begins
+by stating the target API that it is defined for, as illustrated
+in Figure 3. For each IMSpec instance, usage constraints are
+specified with a composition of preconditions pre, postconditions
+post and causal calling relationship ref to cover the
+three major causes of API misuses as discussed above. dc is
+specifically designed to express that functions must not be
+called, because they are deprecated or invoking them could
+introduce a vulnerability [18]. Specifically, we use “ ” as a
+placeholder to represent the elements that are not related to
+this usage constraint.
+
+\input{data/code/cp2-4-syntax}
+
+各个元素
+
+改一下example，增加一个跨函数检查的情况
+\input{data/code/cp2-4-example}
+
+\input{data/code/cp2-4-example-imspec}
+结合example以及例子进行再次讲解
+
+\subsection{语义}
+
+\subsection{应用案例}
+调研结果，给出代码修复片段+样例+解释
 
 \section{本章小结}
 \label{sec:2.5}
