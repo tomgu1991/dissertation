@@ -5,25 +5,25 @@
 (*@\textcolor{blue}{Spec:}@*)
 (*@\textcolor{blue}{Target:}@*) fopen(char*, char*) -> FILE*
 (*@\textcolor{blue}{Pre:}@*) 
-- fopen_arg_1 != NULL, 
-- fopen_arg_2 IN (r, w, a, r+, w+, a+)
+(*@\textcolor{black}{- fopen\_arg\_1 != NULL, }@*)
+(*@\textcolor{black}{- fopen\_arg\_2 IN (r, w, a, r+, w+, a+)}@*)
 (*@\textcolor{blue}{Post:}@*) 
 // failure status and error handling actions specific in example
-- fopen_arg_0 == NULL, RETURN(FILEERR);
+(*@\textcolor{black}{- fopen\_arg\_0 == NULL, RETURN(FILEERR);}@*)
 // success status, close file handler
-- fopen_arg_0 != NULL, CALL(fclose: fopen_arg_0 == fclose_arg_1)
+(*@\textcolor{black}{- fopen\_arg\_0 != NULL, CALL(fclose: fopen\_arg\_0 == fclose\_arg\_1)}@*)
 
 // IMSpec for fgets, which reads charactors and stores them. If a read error occurs, a null pointer is returned.
 (*@\textcolor{blue}{Spec:}@*)
 (*@\textcolor{blue}{Target:}@*) fgets(char*, int, FILE*) -> char*
 (*@\textcolor{blue}{Pre:}@*) // omit single parameter validation
-- LEN(fgets_arg_1) >= fgets_arg_2 
+(*@\textcolor{black}{- LEN(fgets\_arg\_1) >= fgets\_arg\_2 }@*)
 (*@\textcolor{blue}{Post:}@*)
 // failure status 
-- fgets_arg_0 == NULL, CALL(log: true), RETURN(IOERR)
+(*@\textcolor{black}{- fgets\_arg\_0 == NULL, CALL(log: true), RETURN(IOERR)}@*)
 	\end{lstlisting}
 	\caption{
-		FreeRDP中忽略调用关系中参数和返回值的语义关系导致的ICC-API误用缺陷（sha：1845c0b590）。
+		针对于图~\ref{fig:2-4-example}中目标接口的IMSpec实例。
 	}
 	\label{fig:2-4-example-imspec}
 \end{figure}

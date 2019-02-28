@@ -812,65 +812,96 @@ IMSpec旨在通过轻量级、类程序语言结构的方式，描述API的使�
 在现实项目中存在天然缺陷。
 
 
-我们希望通过提供一个面向领域特定需求的轻量级、精确的方式，
+本文希望通过提供一个面向领域特定需求的轻量级、精确的方式，
 以支持大多数通用接口使用约束。
 通过该语言对API使用约束的描述，能够有效的缩减设计者和使用者间的认知差距。
 一方面，使得使用者能够快速、准确的使用这些API；
 另一方面，能够使研究人员、测试人员，有效的对现有的代码进行缺陷检测。
-
-
-We aim at providing a purposespecific
-specification language to cover majority root causes of
-API misuse in a lightweight but precise specification language.
-Therefore, we designed IMSpec with the help of open-source
-community developers as well as the misuses in practice. In
-particular, we made the following major design decisions
+因此，基于缺陷调研结果，与实际开发者讨论后，
+我们基于以下原则进行IMSpec的设计：
 \begin{enumerate}
-	\item 白名单策略：For a given API, there are many ways to be
-	misused, but only a few correct usages. We decided to
-	use whitelisting in most places (i.e., specifying the usage
-	constraints explicitly, otherwise to be incorrect).
-	\item 数据流分析：Data-flow properties are important in
-	reasoning for the API usages. Many misuses occur when
-	developers forget to treat data consistently (e.g., missing
-	release resource when a pointer has been assigned to another
-	location or in all error handling paths).
-	\item API领域特定元素：To provide a simple but powerful
-	specification language for API misuse detection, special
-	elements have to be created, especially properties that are
-	difficult to depict by the syntax of C code (e.g., free memory
-	on heap).
-	\item 工具无关的语义：We equipped IMSpec with
-	tool-independent semantics, which will enable us and others
-	to build more effective tools for diverse purposes (e.g., documentation,
-	test generation, code instructions for dynamic
-	checkers to identify misuses at runtime)
+	\item 白名单策略：
+	对于一个给定的API，API的误用存在很多种不同的形式，难以枚举。
+	于此相反，其正确的使用方式有限，能够在有限的资源下做到精确描述。
+	所以，本文决定通过白名单的方式进行语言设计。
+	即描述正确使用需要满足的约束，
+	并且默认开发者在使用的时候能够显示的对所有的约束进行保证。
+	在检测的过程中，如果遇到约束中的某一条或者几条没有满足，
+	则认为存在一个接口误用缺陷。
+	
+	\item 数据流分析：
+	数据流属性在对接口使用的语义分析中具有重要意义。
+	特别地，我们需要区分API在使用时的上下文，以及其相关的程序对象。
+	接口缺陷中，很多类都涉及到数据流关系。
+	其产生的重要原因是，开发者对程度对象操作的不一致。
+	例如，一个指向堆内存的指针，在没有进行有效释放的时候就被赋值，
+	从而导致内存泄漏缺陷；
+	内存释放函数与内存申请函数个数相对，但是内存对象不想对；
+	没有在所有的路径上都内存进行有效管理，导致某些异常处理路径中存在内存泄漏等等。
+	
+	\item API领域特定元素：
+	为了提供一个语法简单、语义丰富的接口使用描述方式，
+	我们需要针对API使用的特点进行重点关注。
+	即在保证描述能力的前提下，尽可能的精简语法结构。
+	同时，我们需要考虑接口使用的语义信息。
+	特别地，一些语义信息并不能通过C程序的语法接口进行表示。
+	例如：释放一个指向栈内存的指针，将产生一个释放非堆内存的错误（CWE-590：free memory not on heap）。
+	
+	\item 工具无关的语义：
+	接口使用描述语言的一个重要应用是作为缺陷检测工具的输入。
+	因此，该语言需要有独立于特定工具实现的语义信息，
+	以方便研究人员利用该语言设计不同的缺陷检测工具。
+	同时，可以被研究人员在多个应用场景中利用。
+	例如：用于文档中对接口使用规约进行定义，以解决自然语言存在的歧义性；
+	用于测试用例生成，供动态检测工具分析；
+	用于代码插桩技术，将规约转化为C代码中条件语句，在运行时进行监控等等。
 \end{enumerate}
-
-\subsection{语法}
-The abstract syntax of IMSpec is shown in
-Figure 2. An IMSpec rule instance is defined on the level of
-individual usage of a single API. Therefore, the rule begins
-by stating the target API that it is defined for, as illustrated
-in Figure 3. For each IMSpec instance, usage constraints are
-specified with a composition of preconditions pre, postconditions
-post and causal calling relationship ref to cover the
-three major causes of API misuses as discussed above. dc is
-specifically designed to express that functions must not be
-called, because they are deprecated or invoking them could
-introduce a vulnerability [18]. Specifically, we use “ ” as a
-placeholder to represent the elements that are not related to
-this usage constraint.
 
 \input{data/code/cp2-4-syntax}
 
-各个元素
+\subsection{语法}
+我们用$\Nat$与$\Int$来表示非负整数以及全体自然数，
+$\ID$用来表示所有的标识符。
+IMSpec语言的语法结构如图~\ref{fig:2-4-syntax}所示，
+其中$i\in\Nat$, $n\in\Int$、$id \in \ID$。
+为了辅助读者理解IMSpec语言，作者将通过图~\ref{fig:2-4-example}中的例子
+以及图~\ref{fig:2-4-example-imspec}中针对该例子中出错接口的IMSpec规约描述，
+对IMSpec进行详细介绍。
+其中，例子中共有针对两个API（\texttt{fopen(), fgets()}）的四处错误：
+（1）第10行中，缺失的必要参数检查；
+（2）第15行中，错误的异常处理；
+（3）第20行中，错误的错误状态代码检测以及
+（4）第31行中，资源泄漏错误。
+IMSpec描述中对\texttt{fopen, fgets}的使用规约进行了描述。
 
-改一下example，增加一个跨函数检查的情况
 \input{data/code/cp2-4-example}
 
+如图~\ref{fig:2-4-syntax}中所示，
+IMSPec规约集（$\Specs$）由独立的IMSpec描述实例（$\Spec$）组成。
+一个描述实例旨在对一个目标API的使用规约进行描述。
+因此，IMSpec实例需要明确指出该目标规约的对象（$\Target$）。
+例如，图~\ref{fig:2-4-example}中的规约描述的对象分别是
+第3行的\texttt{fopen()}以及第15行的\texttt{fgets()}。
+对于每一个IMSpec实例，目标接口的使用规约由三部分组成：
+不可以使用的特殊标识符（$\Fib$），针对于参数使用的前置条件（$\Pre$），
+以及针对于异常处理和因果调用关系的后置条件（$\Post$）。
+其中前置条件（$\Pre$）与后置条件（$\Post$）的组合能够有效的描述
+上文中总结出的普适性的三种接口使用约束。
+特别地，我们使用占位符“\_”来表示，约束中我们不关心的部分。
+通俗的讲，可以认为“\_”用来表示所有为真的条件。
+
+
+
+
+
+
+
+
+
+
 \input{data/code/cp2-4-example-imspec}
-结合example以及例子进行再次讲解
+
+
 
 \subsection{语义}
 
