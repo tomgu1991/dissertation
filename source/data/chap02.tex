@@ -785,20 +785,39 @@ IMSpec旨在通过轻量级、类程序语言结构的方式，描述API的使�
 以帮助接口开发者和使用者明确使用约束条件、供检测工具对错误使用API导致的缺陷进行查找。
 
 \subsection{设计动机}
-During the analysis of the API-misuse bugs, we find that
-diverse APIs are created to encapsulate different functionalities
-and project-specific semantics. It is impractical to build hardcoded
-rules for each API to detect incorrect usages. However,
-most APIs share similar characteristics of other APIs and
-belong to one of the following types: IPU, IEH and ICC. For
-example, * malloc or * new behave the same as malloc in the
-C Standard Library, indicating successful resource allocation
-has to be released. Moreover, many project-specific APIs face
-the “sparse usage problems” where it incurs limiting times
-under the minimum support of a data mining technique. Thus,
-the automatic static analysis tool based on the assumption that
-a deviation from the most-frequent usage corresponds to a
-misuse will fail to validate these API usages.
+在对接口误用缺陷的调研中，我们发现开发者设计了各种各样的接口，
+以封装现在的功能模块。
+这些接口多具有不同的表现形式、封装了不同的功能，
+并且具有丰富的语义信息。
+因此，针对于这些API，设计并进行独立的缺陷检测器在现实中，难以完成。
+然而这些API之间存在一些普适性的特点，即其缺陷模式多属于如下三种类型：
+不正确的参数使用（IPU）、不正确的异常处理（IEH）以及不正确的因果调用关系（ICC）。
+
+例如，很多开发者通过对C标准库中的\texttt{malloc/free}函数进行封装，
+以实现项目特定的资源管理接口。
+这些接口的名字多表现为\texttt{*\_malloc/*\_free}。
+此外，这些接口在使用的时候，也与标准库中的API一样。
+包括，前者对资源的申请如果失败，则返回空指针；
+如果资源申请成功，那么两者需要协同使用，以保证资源管理的正确性，等等。
+
+另一方面，很多项目特定的API仅在项目中定义和使用。
+这些API使用的次数有限，有些甚至少于5次。
+这种情况使得基于数据挖掘的技术难以应用。
+数据挖掘技术基于统计信息来推断正确和错误，
+算法可行性的基础是存在大量可靠的数据对模型进行训练。
+然而，有限次的接口使用会导致挖掘技术产生大量的误报和漏报。
+即，学习过程中，由于出现次数少，达不到学习模型的最小置信度（support），
+而忽略这些API的使用。
+所以，基于偏离多数情况的使用是错误的统计学习方法，
+在现实项目中存在天然缺陷。
+
+
+我们希望通过提供一个面向领域特定需求的轻量级、精确的方式，
+以支持大多数通用接口使用约束。
+通过该语言对API使用约束的描述，能够有效的缩减设计者和使用者间的认知差距。
+一方面，使得使用者能够快速、准确的使用这些API；
+另一方面，能够使研究人员、测试人员，有效的对现有的代码进行缺陷检测。
+
 
 We aim at providing a purposespecific
 specification language to cover majority root causes of
