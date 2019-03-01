@@ -989,6 +989,8 @@ void manipulate_string(char * string){
 则可能导致缓冲区溢出情况。
 针对于以上两种情况，一个可行的解决方案就是提供禁止的API函数列表。
 提示这些API存在于代码中，提示开发者使用更安全的替代方案。
+需要说明的是，$\Fib$不与其他元素一同使用。
+因此该标志的出现，即可以判断程序不正确。
 
 
 \textbf{Pre}前置条件用来描述接口使用前，需要满足的约束。
@@ -1126,16 +1128,198 @@ fopen_arg_0 != NULL, CALL(flose: fopen_arg_0 == fclose_arg_1)
 否则，不一致的资源管理会导致资源泄漏或者重复释放缺陷。
 
 
+\paragraph{IMSpec形式语义}
+基于静态单侧赋值（SSA）~\cite{ssa}，是程序中间表达（intermediate representation，IR）的特性，
+即每个变数仅被赋值一次。
+后文中，作者将基于具有SSA的程序形式对IMSpec的形式语义进行介绍。
+
+\begin{definition}[程序状态]
+	一个程序状态$s = (l_s, l_e, inst, \Omega)$，是一个四元组。
+	其中 $l_s$ 和 $l_e$分别代表程序的两个位置（program location）， 
+	$inst$代表程序从$l_s$执行到$l_e$中，执行的具体程序语句（instruction），
+	以及在转移后内存中所有变量的值信息$\Omega$。
+\end{definition}
+
+直观地，$l_e$是程序在执行$inst$语句后到达的位置。
+在本文中，我们对三种程序语句进行抽象表示，包括：
+（1）函数调用语句，将对接口\texttt{fName()}的调用表示为\texttt{FCall\_fName}；
+（2）返回语句，即在函数中返回$v$表示为\texttt{Return\_v}；
+（3）条件判断语句（if-condition），即在程序中对值得判断，表示为\texttt{Check\_cond}。
+对于其他语句，我们用\texttt{EMPTY}来表示。
+在程序执行的过程中，内存变量值信息则根据具体的程序语句进行变化。
+
+\begin{definition}[执行轨迹]
+	一条程序执行轨迹$\tau = s_0, s_1, \dots, s_n$是一个有限的程序状态的集合，
+	即从程序位置$s_0.l_s$开始执行，到达$s_n.l_e$结束。
+	其中，任意两个连续的状态的程序位置相同，即$s_i, s_{i+1} \in \tau$, $s_i.l_e = s_{i+1}.l_s$
+\end{definition}
+
+给定一个针对于目标接口$f$的IMspec规约实例$\mathit{spec}$，
+以及一条包含$f$调用的程序执行轨迹$\tau$，
+另$s_{\Delta}$来表示在执行轨迹中，$f$被调用的动作。
+即，$$s_{\Delta}.inst = \text{\texttt{FCall\_f}}$$
+同时，我们另$\tau_{post}$来表示$s_{\Delta}$的下一个状态。
+那么，执行轨迹$\tau$可以表示为，
+$$\tau = s_0, s_1, \dots, s_{\Delta-1}, s_{\Delta}, \tau_{post}$$
+针对于包含$\Fib$的规约，这条轨迹$\tau$显然为误用轨迹。
+所以后文中，我们将不对$\Fib$进行讨论。
+
+因此，规约实例
+$\mathit{spec} = (f, \mathit{pre}, \mathit{post})$
+的语义可以基于执行轨迹$\tau$表示为：
+在公式~\ref{eq:sat}中定义的函数$sat$是否能够满足，
+如果不能满足，那么这条执行轨迹存在目标接口$f$的误用。
+其中函数$sat$由两部分组成，针对于前置条件$\mathit{pre}$的函数$sat_{pre}$与
+针对于后置条件$\mathit{post}$的函数$sat_{post}$。
+
+\begin{equation}
+\label{eq:sat}
+sat(\textit{spec}, \tau) = 
+sat_{pre}(\mathit{pre},
+s_{\Delta-1}) \wedge sat_{post}(\mathit{post},s_{\Delta},\tau_{post})
+\end{equation}
+
+其中$sat_{pre}$的定义如公式~\ref{eq:pre}所示，
+当所有$\Pre$中所有定义的$\Cond$在调用$f$之前满足时，则表明$f$被正确使用。
+特别地，我们需要在状态$s_{\Delta-1}$的值中保证这些约束被满足。
+否则，该执行轨迹为$f$的误用。
+其中，对于所有的$eval(cond, \Omega)$，一方面如果轨迹中包含相应的体检检查\texttt{Check\_cond}，则为真。
+如果没有，则通过值$\Omega$进行语义推理。
+\begin{equation}
+\label{eq:pre}
+sat_{pre}(\mathit{pre}, s) = \bigwedge_{cond\,\in\,\mathit{pre}}^{} eval(cond, s.\Omega)
+\end{equation}
+\begin{equation}
+\label{eq:eval}
+eval(\mathit{cond}, \Omega) = 
+\begin{cases}
+True, & \text{$\mathit{cond}$ is satisfied in $\Omega$}\\
+False,              & \text{otherwise}
+\end{cases}
+\end{equation}
+
+
+针对于后置条件，$sat_{post}$的定义如公式~\ref{eq:post}所示。
+即，针对于后置条件$\mathit{post}$中的每一组$(c,\mathit{acts})$，
+当条件$c$在$f$调用后的程序状态 $s_{\Delta}.\Omega$中满足时（\texttt{Check}(c)为真），
+后续的执行轨迹需要与动作$\mathit{acts}$匹配。
+匹配函数$\mathit{match}(\mathit{as}, \tau)$的定义如公式~\ref{eq:eval}所示，
+即，当该公式为真时，我们认为执行轨迹$\tau$正确。
+否则，该执行轨迹为$f$的误用。
+\begin{align}
+\label{eq:post}
+sat_{post}(\mathit{post},s,\tau) &=  \bigwedge_{(c,acts) \in \mathit{post}}^{} 
+\Big( eval(\mathit{c},s.\Omega) \nonumber \\
+& \implies
+match((\texttt{Check}(c):acts), \tau) \Big)
+\end{align}
+
+令后置条件中$\Action$的动作记作为$\mathit{as} = a_1, a_2, \dots,a_n$。
+那么，函数$\mathit{match}(\mathit{as}, \tau)$用来检测在程序状态子集$\tau_{post}$中是否存在
+一组状态集合
+$\rho = s_{q_0}, s_{q_1}, s_{q_2}, \dots,s_{q_n}$
+满足如下两个条件：
+（1）该状态集合中带有执行时间的偏序关系，即
+$q_0 < q_1 < \ldots < q_n$ and $s_{q_i}\in\tau$；
+（2）状态集合中的状态的执行语句与规约中的动作一致，即
+$\mathbb{ABS}(s_{q_i}.inst) \equiv a_i$。
+$\mathbb{ABS}$操作符用于提取$s_{q_i}.inst$语句的类型以及语义。
+概括来说，
+（1）$a_i$是函数调用的动作$\texttt{Call}(\mathit{fName},\mathit{conds})$时，
+$s_{q_i}.inst$的类型需要是\texttt{FCall\_fName}。
+同时值的关系需要满足，即$sat_{pre}(conds,s_{q_i-1})$为真。
+（2）$a_i$是返回值的动作$\texttt{Return}(\mathit{fName},\mathit{v})$时，
+$s_{q_i}.inst$的上下文应在\texttt{fName}中，且类型需要是\texttt{Return\_v}。
 
 
 
 \section{应用与评估}
 \label{sec:2.5}
-调研结果，给出代码修复片段+样例+解释
+基于C程序接口误用缺陷实例，本文设计了面向接口使用规约的领域特定语言IMSpec。
+IMSpec的设计初衷是对接口使用约束进行描述，以方便开发者和研究人员了解接口使用约束。
+本节将IMSpec应用与实际项目中，同时对IMSpec的有效性进行评估。
+特别地，本节将从两个角度入手：
+\begin{enumerate}
+	\item IMSpec是否可以应用于实际项目中，对接口使用的约束进行描述？
+	\item IMSpec是否能够有效的帮助开发者理解接口使用规约？
+\end{enumerate}
 
-survey：
-1. 自然语言
-2. IMSpec，能够有效的发现缺陷中的错误。
+
+\subsection{描述能力评估}
+为了回答上述“IMSpec是否可以应用于实际项目中，对接口使用的约束进行描述？”的问题，
+作者计划从描述能力对IMSpec进行应用与评估。
+
+\paragraph{方法}
+针对于“可描述性”，本文以~\ref{sec:2.3}调研中的缺陷实例中的接口为对象。
+作者随机选择了150个缺陷实例（每个项目25个），
+使用IMSpec对这些接口进行描述，
+以评估IMSpec是否能对这些使用约束进行有效描述。
+一个API的使用约束可能非常复杂，同时需要深入的领域知识。
+所以在有限的时间内，难以对所有的约束进行撰写。
+因此，作者只针对于接口缺陷实例中出错的约束进行描述。
+
+\paragraph{结果}
+\input{data/tab/cp2-5-description}
+如表~\ref{tab:2-5-description}所示，在150个实例中，共有136个能够通过现有的IMSpec语法进行描述。
+其中，OpenSSL能够全部被支持。
+针对于不能够支持的实例，主要原因如下：
+\begin{itemize}
+	\item 项目特定的语义信息。
+	一方面，在随机选择的缺陷实例中，包含非普适性的缺陷类型。例如对异常处理中的日记信息打印接口的重构（Linux-5b60fc0980）。
+	另一方面，则是具有项目特定的语义信息，例如图~\ref{fig:2-3-fix}(巧合的是该缺陷实例被随机选中)。
+	目标接口\texttt{CFArrayAppendValue()}的参数在使用时需要满足特定的约束条件，
+	然而该条件与项目特定的语义信息相关，同时表现形式复杂，难以描述。
+	\item IMSpec语法不足。
+	IMSpec语言针对于接口使用约束进行设计。
+	同时，为了简化语言的复杂度，作者在设计时并没有将C语言的所有语法结构考虑在内。
+	因此，IMSpec语法存在一定的不足。
+	例如，当接口参数不仅仅存在大小关系，同时需要满足特定的算数关系时，IMSpec则无法支持。
+\end{itemize}
+此外，IMSpec针对于接口使用约束设计，其具有丰富的接口使用领域的特性。
+因此，描述的平均函数为4.35行。
+即能够有效的在对接口使用约束进行描述。
+
+针对于IMSpec的描述能力，评估结果显示在测试用例中IMSpec能够支持多数（90.67\%）情况接口使用约束，
+语法结构简单（平均每个实例4.35行）。
+不过，该语言忽略了部分C程序属性，难以涵盖所有情况。
+对于IMSpec的改进将在第~\ref{sec:5.2}中介绍。
+此外上述用例的IMSpec规约也将用于“有效性”评估和第~\ref{sec:4.4}的案例应用中。
+
+
+\subsection{有效性评估}
+为了回答上述“IMSpec是否能够有效的帮助开发者理解接口使用规约？”的问题，
+作者计划从描述的有效性对IMSpec进行评估。
+
+\paragraph{方法}
+针对于“有效性”，本文以实际开发者作为评估对象。
+由于OpenSSL提供了良好的接口使用用户手册~\footnote{https://www.openssl.org/docs/manmaster/man3/}，因此作者随机选择了50个缺陷实例，
+作者将随机选择的50个缺陷实例与这些缺陷的修复版本随机排序。
+并构造两组测试集：A-Doc组提供OpenSSL项目提供的自然语言描述的使用说明，
+B-IMSpec提供基于IMSpec描述的使用约束。
+通过随机选择的方式，每组测试集各发放给20名实际开发人员。
+并请这些开发人员对代码中存在的缺陷进行标注。
+对于开发人员的标注结果，对精度和召回率进行评估。
+
+\begin{equation}
+\label{eq:p}
+P = \dfrac{\text{\# of 开发者找到的缺陷}}{\text{\# of 开发者报告的缺陷}}
+\end{equation}
+
+\begin{equation}
+\label{eq:r}
+R = \dfrac{\text{\# of 开发者找到的缺陷}}{50}
+\end{equation}
+其中，精度的定义如公式~\ref{eq:p}所示，是真实的缺陷与缺陷报告的商。
+较高的精度值表示缺陷检测效果误报率低，即找到的就是缺陷。
+召回率的定义如公式~\ref{eq:r}所示，是真实的缺陷与所有缺陷的商。
+较高的召回率表示缺陷检测能力强，即能够找到更多缺陷。
+
+
+\input{data/tab/cp2-5-survey}
+
+\paragraph{结果}
+评估结果如表~\ref{tab:2-5-survey}所示。
+
 
 \section{本章小结}
 \label{sec:2.6}
