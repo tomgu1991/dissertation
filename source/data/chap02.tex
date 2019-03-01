@@ -98,8 +98,9 @@ SSLINT~\cite{15-sp-sslint}针对于SSL的若干API设计。
 本章其余部分组织结构如下：
 \ref{sec:2.2}节对相关研究进行总结；
 \ref{sec:2.3}给出针对接口缺陷的调研方法与结果；
-\ref{sec:2.4}给出IMSpec的设计思路、语法与语义，以及应用实例；
-最后在\ref{sec:2.5}总结本章工作。
+\ref{sec:2.4}给出IMSpec的设计思路、语法与语义，
+\ref{sec:2.5}对IMSpec进行实际案例应用与评估；
+最后在\ref{sec:2.6}总结本章工作。
 
 \section{相关工作}
 \label{sec:2.2}
@@ -857,29 +858,104 @@ IMSpec旨在通过轻量级、类程序语言结构的方式，描述API的使�
 	用于代码插桩技术，将规约转化为C代码中条件语句，在运行时进行监控等等。
 \end{enumerate}
 
-\input{data/code/cp2-4-syntax}
+\newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Int}{\mathbb{Z}}
+\newcommand{\ID}{\mathbb{ID}}
+\newcommand{\Cond}{\mathit{Cond}}
+\newcommand{\true}{\texttt{true}}
+\newcommand{\Pre}{\mathit{Pre}}
+\newcommand{\Post}{\mathit{Post}}
+\newcommand{\Fib}{\mathit{Fib}}
+\newcommand{\Return}{\mathit{Return}}
+\newcommand{\ReturnFun}[1]{\texttt{\textbf{RETURN}(}#1\texttt{)}}
+\newcommand{\Call}{\mathit{Call}}
+\newcommand{\CallFun}[1]{\texttt{\textbf{Call}(}#1\texttt{)}}
+\newcommand{\NULL}{\texttt{\textbf{NULL}}}
+\newcommand{\FunName}{\mathit{FunName}}
+\newcommand{\FunSig}{\mathit{FunSig}}
+\newcommand{\Action}{\mathit{Action}}
+\newcommand{\Arg}{\mathit{Arg}}
+\newcommand{\Opd}{\mathit{Opd}}
+\newcommand{\MemberOp}{\mathit{MemberOp}}
+\newcommand{\CmpOp}{\mathit{CmpOp}}
+\newcommand{\UnOp}{\mathit{UnOp}}
+\newcommand{\Set}{\mathit{Set}}
+\newcommand{\Type}{\mathit{Type}}
+\newcommand{\IN}{\texttt{IN}}
+\newcommand{\NOTIN}{\texttt{NOTIN}}
+\newcommand{\LEN}{\texttt{LEN}}
+\newcommand{\TYPE}{\texttt{TYPE}}
+\newcommand{\MEMTYPE}{\texttt{MEMTYPE}}
+\newcommand{\myid}{\mathit{id}}
+\newcommand{\Target}{\mathit{Target}}
+\newcommand{\Spec}{\mathit{Spec}}
+\newcommand{\Specs}{\mathit{Specs}}
 
-\subsection{语法}
+\subsection{语法与语义}
+基于对C程序接口缺陷实例模式的总结以及和开发者讨论，
+作者提出了面向C程序接口使用规约描述的领域特定语言IMSpec。
+这部分中，作者将对IMSpec的语法和形式语义进行介绍。
+
+\paragraph{IMSpec语法元素}
 我们用$\Nat$与$\Int$来表示非负整数以及全体自然数，
 $\ID$用来表示所有的标识符。
 IMSpec语言的语法结构如图~\ref{fig:2-4-syntax}所示，
 其中$i\in\Nat$, $n\in\Int$、$id \in \ID$。
-为了辅助读者理解IMSpec语言，作者将通过图~\ref{fig:2-4-example}中的例子
+在下文中，首先介绍概括性的介绍每一个元素的含义。
+接着为了辅助读者理解IMSpec语言，作者将通过一个代码案例以及对应的IMSpec描述进行详细介绍。
+
+IMSPec规约集（$\Specs$）由独立的IMSpec描述实例（$\Spec$）组成。
+一个描述实例旨在对一个目标API的使用规约进行描述。
+一个IMSpec的实例主要包含四大部分，
+\begin{enumerate}
+	\item $\Target$：用来标记目标API，即这个规约描述的对象。
+	\item $\Fib$：用来定义危险函数，即不推荐使用的函数。包括容易出错的 API 或者已经废弃
+	的旧版本的 API。
+	\item $\Pre$：定义目标接口的前置条件，即在调用API之前，需要满足的约束条件。
+	\item $\Post$：定义目标的后置条件，即在调用API之后，需要满足的约束条件。IMSpec
+	主要关注，异常处理、因果调用关系两种和API使用相关的约束。
+\end{enumerate}
+
+\input{data/code/cp2-4-syntax}
+
+其他元素的语法，我们概括如下：
+\begin{itemize}
+	\item $\Cond$：用来描述boolean类型的表达式，可以当作一个谓词关系。
+	用在$\Pre$中时，用来描述调用目标API前需要满足的约束；
+	用在$\Post$中时，用来描述，如果当前约束满足，则需要执行后续的动作；
+	用在$\Call$中时，用来描述，调用关系中需要满足的值关系约束。
+	\item $\Action$：用来描述，在API执行之后，当特定的约束条件满足时，需要执行的动作。
+	比如异常处理或者处理因果函数调用关系。
+	\item $\Return$：$\Action$的具体表现动作之一，用来描述需要返回特定的值。
+	\item $\Call$：$\Action$的具体表现动作之一，用来描述需要调用特定的接口。
+	\item $\Opd$：是表达式$\Cond$中的操作数（operand），包括函数参数$\Arg$、包含内置$\UnOp$操作符的函数参数$\Arg$、空指针以及自然数$\Int$。
+	\item $\FunSig$：用来表示函数的声明。
+	\item $\Arg$：用来描述接口的参数，形式为接口名、关键词“arg”以及索引位置i的组合。特别地，令i为0时表示接口的返回值。
+	\item $\UnOp$：用来表示内置的操作符，以提供针对接口的语义操作，其中\textbf{$\LEN$}用来表示指针指向的内存空间的大小、\textbf{$\TYPE$}用来表示参数的类型、\textbf{$\MEMTYPE$}用来表示内存类型。
+	\item $\CmpOp$：是表达式$\Cond$中的运算符（operator），目前IMSpec只关注于关系运算符（Relational operators）。
+	\item $\MemberOp$：是表达式$\Cond$中的针对于集合的运算符，目前IMSpec关注于属于和不属于两种。
+	\item $\Set$：用来表示集合，目前IMSpec关注于字符串以及整数的常量集合。
+	\item $\FunName$：用来表示函数名。
+	\item $\Type$：用来表示参数类型。
+\end{itemize}
+
+\input{data/code/cp2-4-example}
+
+\paragraph{IMSpec案例讲解}
+为了帮助读者更好的理解IMSpec的语法结构，
+作者将通过图~\ref{fig:2-4-example}中的例子
 以及图~\ref{fig:2-4-example-imspec}中针对该例子中出错接口的IMSpec规约描述，
 对IMSpec进行详细介绍。
-其中，例子中共有针对两个API（\texttt{fopen(), fgets()}）的四处错误：
+其中共有针对两个API（\texttt{fopen(), fgets()}）的四处错误：
 （1）第10行中，缺失的必要参数检查；
 （2）第15行中，错误的异常处理；
 （3）第20行中，错误的错误状态代码检测以及
 （4）第31行中，资源泄漏错误。
 IMSpec描述中对\texttt{fopen, fgets}的使用规约进行了描述。
 
-\input{data/code/cp2-4-example}
+\input{data/code/cp2-4-example-imspec}
 
-如图~\ref{fig:2-4-syntax}中所示，
-IMSPec规约集（$\Specs$）由独立的IMSpec描述实例（$\Spec$）组成。
-一个描述实例旨在对一个目标API的使用规约进行描述。
-因此，IMSpec实例需要明确指出该目标规约的对象（$\Target$）。
+IMSpec实例需要明确指出该目标规约的对象（$\Target$）。
 例如，图~\ref{fig:2-4-example}中的规约描述的对象分别是
 第3行的\texttt{fopen()}以及第15行的\texttt{fgets()}。
 对于每一个IMSpec实例，目标接口的使用规约由三部分组成：
@@ -890,26 +966,179 @@ IMSPec规约集（$\Specs$）由独立的IMSpec描述实例（$\Spec$）组成�
 特别地，我们使用占位符“\_”来表示，约束中我们不关心的部分。
 通俗的讲，可以认为“\_”用来表示所有为真的条件。
 
+\textbf{Fib}标识符用来处理一种特殊的接口使用约束，
+即被标识的API对象不应该出现在整个项目中。
+随着库函数的更新，很多旧的API被新的API替换，
+以提供更稳定、安全的功能。
+另一方面，在C的标准库或者函数库中，有很多的危险函数，
+调用这些函数会极大地损失系统的可靠性，引入软件缺陷（CWE：Use of Potentially Dangerous Function）。
+例如：下边这段代码中，
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.3\textwidth]
+void manipulate_string(char * string){
+	char buf[24];
+	strcpy(buf, string);
+	...
+}
+\end{lstlisting}
+程序员在没有确保字符指针\texttt{string}指向的数据大小是否适合本地缓冲区时，
+使用潜在危险的\texttt{strcpy()}函数盲目地复制数据。
+如果\texttt{string}可以由攻击者来输入或者影响字符串参数的内容，
+则可能导致缓冲区溢出情况。
+针对于以上两种情况，一个可行的解决方案就是提供禁止的API函数列表。
+提示这些API存在于代码中，提示开发者使用更安全的替代方案。
+
+
+\textbf{Pre}前置条件用来描述接口使用前，需要满足的约束。
+目前，IMSpec只关注与参数值相关的约束条件。
+一个前置条件（$\Pre$）由一组Boolean类型的表达式（$\mathit{Cond}$）组成。
+即，每一个$\mathit{Cond}$都是一个独立的条件，当这些都满足的时候，
+才能够确保API满足了被调用的环境，能够正确的完成其内部封装的功能。
+因此前置条件$\Pre$中的每个$\mathit{Cond}$都必须要为真，才算作正确的使用。
+
+在表达式$\mathit{Cond}$中，我们通过（$\mathit{Arg}$）来表示API的参数以及返回值。
+在$\mathit{Arg}$中，我们通过索引位“i”来表示第几个参数。
+例如，
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.3\textwidth]
+fopen_arg_1 != NULL
+\end{lstlisting}
+表示接口\texttt{fopen()}的第一个参数不为NULL的表达式。
+特别地当i为零时，代表接口的返回值。
+例如，
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.3\textwidth,]
+fopen_arg_0 == NULL
+\end{lstlisting}
+则表示接口\texttt{fopen()}的返回值为NULL的表达式。
+因此根据图~\ref{fig:2-4-example-imspec}中第5行的描述可知，
+图~\ref{fig:2-4-example}中第11行对接口\texttt{fopen()}存在误用，
+即没有保证第一个参数不为空。
+
+
+为了支持数值关系相关的约束以及C语法无法显示表示的语义约束，
+IMSpec提供了三个内置的运算符$\UnOp$。
+\textbf{\texttt{LEN}}用来表示，指针所指向的内存对象的长度。
+需要说明的是，该运算符与指针具体的类型相关。
+例如，下列代码中，
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.3\textwidth]
+int* ptr = (int*) malloc(sizeof(int)*100);
+char* ptr_c = (char*) ptr;
+int buffer[100];
+\end{lstlisting}
+\texttt{LEN(ptr)}的值为100，而\texttt{LEN(ptr\_c)}的值为400或者800，
+具体的值取决于系统中int类型的长度。
+再比如下面约束则表示，
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.3\textwidth]
+LEN(fgets_arg_1) >= fgets_arg_2
+\end{lstlisting}
+\texttt{fgets()}函数的第一个参数指向的内存区域的大小要大于或者等于第二个参数。
+\textbf{\texttt{TYPE}}用来表示，该操作符的具体类型。
+该类型信息则在变量声明时就确定。
+例如，上述例子中\texttt{TYPE(ptr)}的值为指向整数类型的指针（int*），
+而\texttt{TYPE(ptr\_c)}的值char*。
+\textbf{\texttt{MEMTYPE}}用来表示指针所指向的内存对象的区域属性，
+即使堆（heap）还是栈（stack）。
+例如，上述例子中\texttt{MEMTYPE(ptr)}的值为heap，
+而\texttt{MEMTYPE(buffer)}的值stack。
+需要说明的是，C语言语法本身无法表示以上三种属性。
+
+此外，在实际项目中，某些参数的取值范围需要在特定的值域范围内。
+例如一个文件的打开方式只能够是特定模式$(r, w, a, r+, w+, a+)$中的一种。
+为了能够支持，这种约束条件，IMSpec提供了集合运算符$\mathit{MemberOp}$。
+其中\texttt{\textbf{IN}}表示，操作数需要在一个集合当中；
+\texttt{\textbf{IN}}则表示，操作数不可以是集合中的元素。
+目前，我们的集合元素，只使用与表示符集合以及整数集合。
+其中，整数集合利用区间表示$[n_1:n_2]$，即从$n_1$到$n_2$的所有整数。
+因此，图~\ref{fig:2-4-example-imspec}中第六行的约束
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.3\textwidth]
+fopen_arg_2 IN (r, w, a, r+, w+, a+)
+\end{lstlisting}
+的含义是，接口\texttt{fopen()}的第二个参数需要是这个集合中的某个元素。
+
+
+\textbf{Post}后置条件用于对接口异常检测以及因果调用关系的使用约束进行描述。
+如上文中所述，C语言没有内置的异常处理机制。
+因此，开发者多在返回值中携带错误状态代码。
+所以，为了描述接口对于异常检测相关的使用约束，IMSpec需要包含两部分：
+错误代码检测的$\mathit{Cond}$表达式，以及表达式成立时后续的异常处理动作$\mathit{Action}$。
+基于对实际项目中接口缺陷模式的总结，IMSpec目前支持两种异常处理动作：
+错误代码向上传递的$\Return$操作，以及调用特定的接口$\Call$。
+$\Return$操作旨在描述，当目标API执行中发生错误时，需要通知外界调用者。
+所以，返回一个错误代码$n$。
+特别地，针对于不同的上下文，返回值可能不同。
+IMSpec通过$\Return$中的函数名进行区别。
+同时，如上文所示，当函数名为“\_”时，则表示对所有的上下文适用。
+$\Call$旨在描述，当目标API执行错误时，需要调用其他的接口来协同处理异常。
+例如资源的关闭、调用日志关系接口输出运行错误信息等。
+如图~\ref{fig:2-4-example-imspec}中第9、20行所示，
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.15\textwidth]
+fopen_arg_0 == NULL, RETURN(foo:FILEERR);
+fgets_arg_0 == NULL, CALL(log: true), RETURN(_:IOERR)
+\end{lstlisting}
+开发者需要对\texttt{fopen()}和\texttt{fgets()}的返回值进行判断。
+当\texttt{fopen()}在出错时，会返回一个NULL指针。
+因此，该约束表明，当发生错误即返回值为NULL时，
+开发者需要在\texttt{foo()}上下文中返回一个错误代码\textbf{FILEERR}。
+而对于\texttt{fgets()}，发生错误后，开发者需要进行两个异常处理：
+（1）调用异常输出接口\texttt{log()};
+（2）返回默认的错误代码\textbf{IOERR}。
+由于，开发者通常会对异常代码进行宏定义，所以IMSpec在解析的过程中，
+可以提供一个宏定义文件进行替换。
+
+另一方面，$\Post$可以用于对因果调用关系的约束进行描述。
+因果调用关系可以简单描述为\texttt{a-[cond]-b}形式，
+即调用\texttt{a}后，且\texttt{cond}调用后的某种条件满足（例如：a顺利执行），
+那么就调用\texttt{b}接口。
+IMSpec通过将接口\texttt{a}作为$\Target$，将\texttt{b}在$\Post$中描述，来表达这种约束关系。
+例如，接口\texttt{fopen()}与\texttt{fclose()}协同对文件的打开和关系进行管理。
+同时，当文件被成功打开时，即\texttt{fopen()}返回值不为空时，
+才需要调用\texttt{fclose()}关闭文件。
+则IMSpec的描述如图~\ref{fig:2-4-example-imspec}中11行所示，
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.15\textwidth]
+fopen_arg_0 != NULL, CALL(flose: fopen_arg_0 == fclose_arg_1)
+\end{lstlisting}
+即接口使用者需要对\texttt{fopen()}的返回值进行检查，如果不为NULL，
+则需要调用关闭接口\texttt{fclose()}。
+特别地，需要考虑两者间的数据流关系，即打开和关闭需要针对于同一个文件句柄，
+即描述中CALL后面的$\Cond$表达式。
+否则，不一致的资源管理会导致资源泄漏或者重复释放缺陷。
 
 
 
 
 
-
-
-
-
-\input{data/code/cp2-4-example-imspec}
-
-
-
-\subsection{语义}
-
-\subsection{应用案例}
+\section{应用与评估}
+\label{sec:2.5}
 调研结果，给出代码修复片段+样例+解释
 
+survey：
+1. 自然语言
+2. IMSpec，能够有效的发现缺陷中的错误。
+
 \section{本章小结}
-\label{sec:2.5}
+\label{sec:2.6}
 本章提出了基于缺陷模式的C程序接口使用规约描述语言。
 为有效的进行语言设计，本章首先对C程序中的接口误用缺陷实例进行研究和总结。
 以不同领域、广泛使用的六个开源软件作为研究对象，

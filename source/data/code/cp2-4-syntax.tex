@@ -1,37 +1,4 @@
-\newcommand{\Nat}{\mathbb{N}}
-\newcommand{\Int}{\mathbb{Z}}
-\newcommand{\ID}{\mathbb{ID}}
-\newcommand{\Cond}{\mathit{Cond}}
-\newcommand{\true}{\texttt{true}}
-\newcommand{\Pre}{\mathit{Pre}}
-\newcommand{\Post}{\mathit{Post}}
-\newcommand{\Fib}{\mathit{Fib}}
-\newcommand{\Return}{\mathit{Return}}
-\newcommand{\ReturnFun}[1]{\texttt{\textbf{RETURN}(}#1\texttt{)}}
-\newcommand{\Call}{\mathit{Call}}
-\newcommand{\CallFun}[1]{\texttt{\textbf{Call}(}#1\texttt{)}}
-\newcommand{\NULL}{\texttt{\textbf{NULL}}}
-\newcommand{\FunName}{\mathit{FunName}}
-\newcommand{\FunSig}{\mathit{FunSig}}
-\newcommand{\Action}{\mathit{Action}}
-\newcommand{\Arg}{\mathit{Arg}}
-\newcommand{\Opd}{\mathit{Opd}}
-\newcommand{\MemberOp}{\mathit{MemberOp}}
-\newcommand{\CmpOp}{\mathit{CmpOp}}
-\newcommand{\UnOp}{\mathit{UnOp}}
-\newcommand{\Set}{\mathit{Set}}
-\newcommand{\Type}{\mathit{Type}}
-\newcommand{\IN}{\texttt{IN}}
-\newcommand{\NOTIN}{\texttt{NOTIN}}
-\newcommand{\LEN}{\texttt{LEN}}
-\newcommand{\TYPE}{\texttt{TYPE}}
-\newcommand{\MEMTYPE}{\texttt{MEMTYPE}}
-\newcommand{\myid}{\mathit{id}}
-\newcommand{\Target}{\mathit{Target}}
-\newcommand{\Spec}{\mathit{Spec}}
-\newcommand{\Specs}{\mathit{Specs}}
-
-\begin{figure}[b]
+\begin{figure}[t]
 	\centering
 	{
 \begingroup
@@ -45,7 +12,7 @@
 \Post & ::= & \textbf{\texttt{Post: }} (\Cond \texttt{,} \Action^*)^+ \\
 \Cond & ::= & \true \mid \Opd~\CmpOp~\Opd \mid \Opd~\MemberOp~\texttt{(}\Set \texttt{)} \\
 \Action & ::= & \Return \mid \Call   \\
-\Return & ::= & \ReturnFun{n} \mid \ReturnFun{\NULL} \\
+\Return & ::= & \ReturnFun{\FunName:n} \mid \ReturnFun{\FunName:\NULL} \\
 \Call & ::= & \CallFun{\FunName \texttt{:} \Cond^*} \\
 \Opd & ::= & \Arg \mid \UnOp\texttt{(}\Arg\texttt{)} \mid \textbf{\NULL} \mid n\\
 % funName(type*) -> function may have no parameter
@@ -54,7 +21,7 @@
 \UnOp & ::= & \textbf{\LEN} \mid \textbf{\TYPE} \mid \textbf{\MEMTYPE} \\
 \CmpOp & ::= & \textbf{\texttt{!=}} \mid \textbf{\texttt{==}} \mid \textbf{\texttt{>=}} \mid \textbf{\texttt{>}} \mid \textbf{\texttt{<=}} \mid \textbf{\texttt{<}} \\
 \MemberOp & ::= & \textbf{\IN} \mid \textbf{\NOTIN} \\
-\Set & ::= & \myid^+ \mid n^+ \\
+\Set & ::= & \myid^+ \mid [n_1:n_2]^+ \\
 \FunName & ::= & \myid \\
 \Type & ::= & \myid
 \end{IEEEeqnarray*}

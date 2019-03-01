@@ -9,7 +9,7 @@
 (*@\textcolor{black}{- fopen\_arg\_2 IN (r, w, a, r+, w+, a+)}@*)
 (*@\textcolor{blue}{Post:}@*) 
 // failure status and error handling actions specific in example
-(*@\textcolor{black}{- fopen\_arg\_0 == NULL, RETURN(FILEERR);}@*)
+(*@\textcolor{black}{- fopen\_arg\_0 == NULL, RETURN(foo:FILEERR);}@*)
 // success status, close file handler
 (*@\textcolor{black}{- fopen\_arg\_0 != NULL, CALL(fclose: fopen\_arg\_0 == fclose\_arg\_1)}@*)
 
@@ -20,7 +20,7 @@
 (*@\textcolor{black}{- LEN(fgets\_arg\_1) >= fgets\_arg\_2 }@*)
 (*@\textcolor{blue}{Post:}@*)
 // failure status 
-(*@\textcolor{black}{- fgets\_arg\_0 == NULL, CALL(log: true), RETURN(IOERR)}@*)
+(*@\textcolor{black}{- fgets\_arg\_0 == NULL, CALL(log: true), RETURN(\_:IOERR)}@*)
 	\end{lstlisting}
 	\caption{
 		针对于图~\ref{fig:2-4-example}中目标接口的IMSpec实例。
