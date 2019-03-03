@@ -1,10 +1,18 @@
 \chapter{接口缺陷静态检测技术研究}
 \label{cha:imchecker}
+对接口缺陷检测进行研究具有重要意义。
+一方面，接口误用是导致软件错误、系统崩溃、漏洞产生的重要愿意之一。
+另一方面，随着开源社区的发展，软件库文档缺失、开发人员对API理解不足，
+导致现有的代码中存在大量的接口误用缺陷。
 0.5页
 
 \section{引言}
 静态分析是什么(cxP65)
 1页
+
+现有某一类
+
+规模化
 
 \section{相关工作}
 
@@ -52,6 +60,45 @@
 1页
 例子解释
 0.5页
+\begin{algorithm}
+	\KwIn{~~~\textsf{SyncBlock} 计算模型内所有复合构件的 $<connection>$，
+		\\~~~~~~~~~~~~~~~顶层复合构件的所有输入端口 $<port\_declaration>$，
+		\\~~~~~~~~~~~~~~~顶层的每一个输入端口 $p_i$ 对应的环境输入值 $I_i$。 }
+	\KwOut{更新所有与顶层复合构件输入端口相连接的端口的值。}
+	\vspace{3ex}
+	%\SetAlgoLined
+	\For{~~顶层复合构件 $<port\_declaration>$ 中的每一个输入端口 $p_i$~~}{
+		$p_i \gets I_i$ \;
+		\tcp{取出所有与 $p_i$ 直接相连的内部子构件的端口}
+		$p_i \left[\right] \gets Connection\_Target(p_i,~<connection>)$ \;
+		\For{~~$p_i \left[\right]$ 中的每个端口 $p_i\left[ j \right]$~~} {
+			\tcp{根据端口 $p_i\left[ j \right]$ 的性质，判断是否要继续向下搜索传递}
+			\eIf{~~$p_i\left[ j \right]$ 不是原子构件的输入端口~~}{
+				\tcp{如果连接上有表达式，进行数据处理再赋值}
+				\eIf{~~$<connection>$~上有表达式~~}{
+					$p_i\left[ j \right] \gets Comput\_Exp(p_i)$ \;
+				}{
+					$p_i\left[ j \right] \gets p_i$ \;
+				}
+				\tcp{取出所有与$p_i\left[ j \right]$ 直接相连的端口，添加到 $p_i \left[\right]$ 中}
+				$p_{temp} \left[\right] \gets Connection\_Target(p_i\left[ j \right], <connection>)$ \;
+				$p_i \left[\right] \gets Append(p_i \left[\right], p_{temp} \left[\right])$ \;
+				
+			}{
+				\tcp{$p_i\left[ j \right]$ 是原子构件的输入端口，不需要继续向下搜索传递}
+				\eIf{~~$<connection>$~上有表达式~~}{
+					$p_i\left[ j \right] \gets Comput\_Exp(p_i)$ \;
+				}{
+					$p_i\left[ j \right] \gets p_i$ \;
+				}
+			}
+			
+		}
+	}
+	\caption{从外部环境读入输入序列，传递到原子构件输入端口}
+	\label{alg:Input}
+\end{algorithm}
+
 \subsection{检测结果过滤}
 为什么
 
