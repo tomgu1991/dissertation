@@ -408,47 +408,121 @@ xleftmargin=.25\textwidth]
 接着，对于这些软件包，作者在Github中搜索是否存在这些软件包。
 目的在于，确保这些应用对象然而活跃于开源社区中，同时提交的缺陷报告可以及时获得回复。
 对于软件包编译、分析需要大量的时间，
-因此本文选择了15个广泛使用、不同应用领域、开发者持续维护的应用软件，包括：
+因此本文选择了15个广泛使用、不同应用领域、开发者持续维护的应用软件。
+为了有效评估Tsmar-IMChecker的检测能力，所有应用对象选择了截止至2018年7月10-15日的最新的稳定版本，
+即Linux内核4.18-rc4，OpenSSL-1.1.1-pre8，以及Ubuntu操作系统中应用软件：
 \begin{itemize}
 	\item dma: 邮件服务，主分支，86个关注（Star数目）
 	\item exim: 邮件服务，版本4.91，393个关注
 	\item hexchat: 网络实时聊天，版本2.14.1，1949个关注
 	\item httping: 针对HTTP请求的Ping服务，主分支，302个关注
 	\item ipmitool: 针对智能平台管理接口（Intelligent Platform Management Interface，IPMI）的控制系统，主分支，122个关注
-	\item open-vm-tools: 邮件服务，版本4.91，393个关注
-	\item irssi: 邮件服务，版本4.91，393个关注
-	\item keepalive: 邮件服务，版本4.91，393个关注
-	\item thc-ipv6: 邮件服务，版本4.91，393个关注
-	\item freeradius-server: 邮件服务，版本4.91，393个关注
-	\item trfficserver: 邮件服务，版本4.91，393个关注
-	\item tinc: 邮件服务，版本4.91，393个关注
-	\item sslplit: 邮件服务，版本4.91，393个关注
-	\item rdesktop: 邮件服务，版本4.91，393个关注
-	\item proxytunnel: 邮件服务，版本4.91，393个关注
+	\item open-vm-tools: WMware软件管理，版本10.3.0，956个关注
+	\item irssi: 通信软件，版本1.1.1，1918个关注
+	\item keepalive: 负载均衡管理软件，版本2.0.5，1717个关注
+	\item thc-ipv6: IPV6攻击测试软件，主分支，442个关注
+	\item freeradius-server: 多协议服务器，主分支，943个关注
+	\item trafficserver: 网络代理服务器，版本7.1.3，907个关注
+	\item tinc: VPN后台服务，版本1.1-pre16，854个关注
+	\item sslplit: SSL/TLS攻击测试工具，主分支，1106个关注
+	\item rdesktop: 远程桌面服务，主分支，577个关注
+	\item proxytunnel: 网络代理服务，主分支，155个关注
 \end{itemize}
 
-为了有效评估Tsmar-IMChecker的检测能力，所有应用对象选择了截止至2018年7月10日的最新的稳定版本，
-即Linux内核4.18-rc4，OpenSSL-1.1.1-pre8，以及Ubuntu操作系统中应用软件的主分支。
-
 \paragraph{目标API}
+目标API包括两个部分。
+（1）针对于Linux内核和OpenSSL，本文将第~\ref{sec:2.5}节中撰写的IMSpec约束，作为目标API。
+旨在通过这些被误用过的API再次对这些项目进行检测，以观察是否依旧存在误用情况。
+（2）对于15个Ubuntu中的应用软件，本文首先通过GNU cflow\footnote{http://www.gnu.org/software/cflow/}抽取这些应用软件的函数调用图。
+基于函数调用图和OpenSSL提供的用户手册，选择调用图中使用的OpenSSL中的接口。
+例如在dma项目中，通过cflow和OpenSSL用户手册的结果，
+我们发现该项目使用了OpenSSL中包含\texttt{SSL\_connect()}等17个不同的API。
+接着在15个项目中，本文将提取的API的使用情况进行总结，选取至少使用过两次的接口。
+最终共选择78个不同的API作为检测目标。
+本文将这些目标API的IMSpec规约描述文件公开\footnote{https://github.com/tomgu1991/IMChecker/tree/master/imspec}，共研究人员和开发者使用。
 
 \paragraph{实验环境}
-1页
-
-https://github.com/tomgu1991/IMChecker/tree/master/imspec
-
+本文在一台装有64 位Ubuntu 16.04的台式机上进行。
+该机器配有Intel(R) Core(R) i5-3470@3.20GHz-4核心CPU和32GB内存。
+Tsmart-IMChecker工具需要通过Clang对项目进行预处理，抽取LLVM-IR的中间表达。
+然而，部分项目无法完全被Clang支持，例如Linux内核。
+同时，部分项目依赖于旧版本的编译环境或者其他编译库难以满足。
+这对于这些情况，本文工作人工的方式，对这些目标项目中使用了目标API的文件进行单独编译。
+并将这些能够编译的文件作为分析目标，提供给分析引擎。
+为了控制分析的时间和输出结果，本文每次分析执行一个目标API。
+所有的分析中，本文以3小时作为时间界限，即如果三小时无法完成，则将已有分析结果输出。
+对于所有找到的实际缺陷，本文作者在对象项目中提交缺陷报告或者提交修改申请（Pull Request）。
 
 \subsection{缺陷检测结果}
 %https://github.com/tomgu1991/IMChecker/blob/master/evaluation_data/new_bugs/bug_list.md
-\input{data/tab/cp4-4-target}
+\input{data/tab/cp4-4-result}
+Tsmart-IMChecker工具针对于上述17个开源项目的应用结果如表~\ref{tab:4-4-result}所示。
+在第一列中，给出了项目的名称。
+在第二列中，对缺陷报告总数进行展示。
+第三列和第四列分别给出在报告的缺陷中，开发者已经确认但没有修复的个数，
+以及开发者确认并且修复的缺陷报告个数。
+表中数据显示，Tsmart-IMChecker工具共在17个项目中发现75个实际接口误用缺陷。
+其中Linux内核具有30个，25个已经被开发者确认，5个已经在最新的代码中进行修复与集成。
+OpenSSL共检测出17个缺陷，全部被开发者确认，其中12个已经被修复并集成到主分支和发布版本中。
+Ubuntu系统中的应用软件分别检测到1-3个缺陷，每个项目具体数据如表中所示。
+综合来看，75个缺陷中，61个已经被开发者确认，32个已经被成功修复。
+下文将对Linux内核、OpenSSL和Ubuntu中的应用软件中的缺陷进行详细讨论。
 
-
-总体结果
-0.5
-buglist
+\input{data/tab/cp4-4-linux}
 
 \paragraph{Linux内核}
-2页
+如表~\ref{tab:4-4-linux}中所示，在Linux内核中，
+Tsmart-IMChecker工具共发现30个未被报告的接口缺陷。
+针对于每一个缺陷报告，本文作者首先在Linux的缺陷报告系统\footnote{https://bugzilla.kernel.org}中进行查询，
+是否已经有开发者进行提交。
+如果没有，则对缺陷报告进行提交。
+在提交报告给开发者后，其中25个已经被开发者确认并收到开发者回复的邮件。
+针对于维护者的要求，本文作者正在提交相应的修改记录。
+其中5个已经被维护者接受，2个已经集成到Linux最新版当中，3个在进行代码风格修改。
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\linewidth]{figures/cp4-linux-example.png}
+	\caption{
+		Linux接口缺陷200505提交和讨论记录。
+	}
+	\label{fig:4-4-linux-example}
+\end{figure}
+
+\begin{figure}[b]
+	\centering
+	\begin{lstlisting}
+"summary": "fix setting of 'ret' error return for a few cases",
+"date": "2018-08-162018-08-16",
+"author": "Jens Axboe",
+drivers/block/pktcdvd.c
+=======================================================
+@@ -2740,6 +2740,7 @@ static int pkt_setup_dev(dev_t dev, dev_t* pkt_dev)
+pd->write_congestion_on  = write_congestion_on;
+pd->write_congestion_off = write_congestion_off;
+
++	ret = -ENOMEM;
+	disk = alloc_disk(1);
+	if (!disk)
+		goto out_mem;
+	\end{lstlisting}
+	\caption{
+		Linux接口缺陷200505修复细节。
+	}
+	\label{fig:4-4-linux-example-fix}
+\end{figure}
+
+如图~\ref{fig:4-4-linux-example}为作者将误用接口\texttt{alloc\_disk()}的缺陷实例提交，以及修复的记录截图。
+根据Linux中错误处理机制，接口\texttt{alloc\_disk()}出错时，外层调用者需要返回\textbf{-ENOMEM}来表示内存不足的错误信息。
+然而在drivers/block/pktcdvd.c文件的\texttt{pkt\_setup\_dev()}函数中的2718行调用该接口后，
+在异常检测路径上并有对返回值机型修改，导致一个不正确的异常处理缺陷（IEH）。
+在对该缺陷进行仔细核对后，本文作者将缺陷提交到Linux缺陷报告系统中，编号为200505。
+该缺陷报告在提交后，获得了维护者的回复。
+在经过三轮的缺陷细节讨论过后，该缺陷被维护者确认，并集成到Linux内核的主分支中。
+缺陷修复的细节如图~\ref{fig:4-4-linux-example-fix}中所示，
+即在返回之前对返回值赋值为的错误代码\textbf{-ENOMEM}。
+
+
 
 \paragraph{OpenSSL}
 2页
