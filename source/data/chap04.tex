@@ -43,7 +43,7 @@ APIMU4C包含本文中所有的原始数据集，
 
 
 为了提高工具的实用性，减轻使用者的负担，现有工具都提供良好的用户接口。
-每个工具都有自己的特定，所针对的对象亦不同。
+每个工具都有自己的特点，所针对的对象亦不同。
 针对IMSpec语言和IMChecker检测方法，本文开发了相关的图形化支撑工具集Tsmart-IMChecker，
 以提供更好的用户体验。
 本工具集共包含三个主要模块，即：
@@ -199,6 +199,8 @@ Tsmart-IMChecker是基于可视化支持的C程序接口缺陷检测工具集。
 	\item {\kaishu 规约列表}
 	界面的最左侧是规约列表，用于展示使用者已经完成的IMSpec接口约束实例。
 	用户可以在列表中直观地了解已经完成的约束描述。
+	目前IMSpec撰写工具将一个复杂规约会分解成多个子约束进行检测，以提高检测精度。
+	因此，显示结果为分解后的约束条件。
 	\item {\kaishu 编辑区} 
 	界面的右侧为规约编辑区，用于对IMSpec规约进行编辑。
 	编辑区包括三大主要区域：目标对象区域、前置条件编写和后置条件编写区域。
@@ -207,7 +209,11 @@ Tsmart-IMChecker是基于可视化支持的C程序接口缺陷检测工具集。
 	后续中，用户可以根据具体的接口使用约束，对前置条件和后置条件进行编辑。
 	特别地，IMSpec规约撰写工具在IMSpec语法基础之上，
 	在界面显示中进行了细微的调整，以提供更直观、准确的功能。
+	在规约撰写中，用户可以使用宏定义以保持程序语义一致性。
+	在缺陷检测阶段提供宏定义的头文件即可。
 	\item {\kaishu 文件操作区} 
+	界面的左下角是文件操作区域，包括加载宏定义文件、加载文件和导出三个功能。
+	
 \end{itemize}
 
 用户通过命令行，执行imspec\_writer.py运行该工具：
@@ -231,7 +237,7 @@ xleftmargin=.3\textwidth]
 #define FILEERR -1
 #define IOERR -2
 \end{lstlisting}
-则在后续的解析IMSpec语言时，解析会进行宏展开，以和程序中的语义保持一致。
+则在后续的解析IMSpec语言时，解析会进行宏定义的展开，以和程序中的语义保持一致。
 
 \begin{figure}[t]
 	\centering
@@ -248,53 +254,194 @@ xleftmargin=.3\textwidth]
 	\centering
 	\includegraphics[width=0.85\linewidth]{figures/cp4-IMChecker-engine.png}
 	\caption{
-		IMSpec规约撰写工具截图。
+		IMChecker分析引擎运行时截图。
 	}
 	\label{fig:4-3-IMChecker-engine}
 \end{figure}
-为什么
 
-界面介绍
+研究人员和工具开发人员通过简单易用的用户接口，
+以提高工具的实用性，减轻使用者的负担。
+特别地，每个工具针对自己应用对象的不同，在工具接口上都有自己的设计目的和特定。
+本文通过对IMChecker方法的实现和封装，以命令行的方式帮助开发者，
+直接调用分析引擎，并生成对应的缺陷分析报告。
 
-输出结果
-1页
+如图~\ref{fig:4-3-IMChecker-engine}所示，IMChecker分析引擎在命令行中通过直接调用如下指令即可运行，
+\begin{lstlisting}[language={bash},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.1\textwidth]
+(*@\textcolor{blue}{Ubuntu@~:Python3}@*) engine.py --spec=XXX --specDefine=XXX --input=XXX
+\end{lstlisting}
+其中，参数的具体含义如下：
+\begin{itemize}
+	\item spec: 目标接口使用约束IMSpec文件。该文件可以由IMSpec规约撰写工具生成，也可以用户直接根据IMSpec语法进行撰写。其内容如图~\ref{fig:2-4-example-imspec}中IMSpec实例所示。
+	\item specDefine: 规约实例中宏参数的具体定义。在分析阶段，分析引擎会根据宏定义，对IMSpec规约进行展开，以及缺陷检测。
+	例如在上文介绍的define.h文件。
+	\item input: 待分析文件。目前分析引擎在单独使用时，
+	接受单独可编译的C源代码，以及预处理后的LLVM-IR中间表达。
+	在Tsmart工具集中，我们提供了Build-capture编译抓取工具，
+	自动生成LLVM-IR表达。使用者亦可以通过Clang对项目进行编译，通过-S指令生成LLVM-IR表达。
+	如果用户通过Tsmart项目对接口缺陷进行检测，则不需要考虑预处理操作。
+	详细使用说明，可以参考Tsmart用户手册~\cite{tsmart}。
+\end{itemize}
+在分析过程中，IMChecker分析引擎将运行时状态输出到控制台中，以帮助开发者获知分析进展。
+同时，对于分析中遇到的问题，开发者可以获知原因，并进行修复。
+如图~\ref{fig:4-3-IMChecker-engine}所示，分析引擎首先对IMSpec规约文件进行解析，
+接着进入预处理阶段创建CFA、分析阶段，最后针对于分析结果输出到缺陷检测结果报告IMCheckerResult.yaml中。
+
+\begin{figure}[t]
+	\centering
+	\begin{minipage}{0.7\linewidth}
+\begin{lstlisting}[language={C},
+basicstyle=\linespread{0.7}\listingsfont,
+numbers=none,frame=trBL,
+xleftmargin=0pt]
+  - (*@\textcolor{blue}{Bug}@*):
+    (*@\textcolor{blue}{API}@*): fopen
+    (*@\textcolor{blue}{Type}@*): IPC
+    (*@\textcolor{blue}{Spec}@*):  fopen==> fopen_arg1!=NULL
+    (*@\textcolor{blue}{Reason}@*): Missing or incorrect validation of parameter
+    (*@\textcolor{blue}{Error}@*): 
+      - IMChecker/tools/example_code/example.c:bad1:14
+    (*@\textcolor{blue}{Good}@*): 
+      - IMChecker/tools/example_code/example.c:good1:52
+\end{lstlisting}
+	\end{minipage}
+	\caption{
+		IMChecker分析结果示例。
+	}
+	\label{fig:4-3-Result}
+\end{figure}
+
+IMChecker分析引擎将结果输出到缺陷检测报告中，针对每一个目标API的一种缺陷模式，
+缺陷检测结果将汇总在一个“Bug”标签中。
+图~\ref{fig:4-3-Result}中给出了图~\ref{fig:2-4-example}中程序检测的一个缺陷实例，其中
+\begin{itemize}
+	\item Bug标签为一个目标API某一种缺陷的分类符。
+	\item API标签给出了目标API的接口名。
+	\item Type标签给出缺陷的具体类型。在实际应用场景中，本文将缺陷的类型进行进一步扩展，以展示更具体的缺陷原因。
+	\item Spec标签给出了导致误用的具体约束条件。例如图说所描述的是，第一个参数不可以为NULL。
+	\item Reason标签给出基于自然语言的缺陷原因。
+	\item Error标签给出具体缺陷发生的程序位置。
+	\item Good标签给出针对于目标API正确使用的程序位置，即满足约束的位置。
+\end{itemize}
+如果，该类型的错误存在多个或者存在多个正确的使用，则Error和Good标签拥有多个实例。
+使用者可以通过缺陷检测结果报告对缺陷进行核对，也可以通过IMDisplayer工具进行分析。
+此外，该缺陷报告也可以供其他工具的开发者利用。
+
+
 \subsection{结果展示模块}
-\begin{figure}[b]
+\begin{figure}[t]
 	\centering
 	\includegraphics[width=0.85\linewidth]{figures/cp4-IMDisplayer.png}
 	\caption{
-		IMSpec规约撰写工具截图。
+		IMDisplayer结果展示工具运行时截图。
 	}
 	\label{fig:4-3-IMDisplayer}
 \end{figure}
-为什么
 
-界面介绍
+为了更好的对缺陷结果进行展示，研究人员和开发者设计并实现了各种各样的GUI界面。
+针对于接口使用和接口缺陷的特点，本文设计了本文设计了IMDisplayer结果展示工具，
+通过差异性结果对比的方式，帮助开发者深入理解API使用上下文的不同，
+并未开发者修复缺陷提供参考。
 
-输出结果
-1页
-差异性结果展示模块
+IMDisplayer结果展示工具在命令行中通过直接调用如下指令即可运行，
+\begin{lstlisting}[language={bash},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.3\textwidth]
+(*@\textcolor{blue}{Ubuntu@~:Python3}@*) report_displayer.py
+\end{lstlisting}
+如图~\ref{fig:4-3-IMDisplayer}所示，IMDisplayer工具包含五个部分：
+缺陷报告路径选择模块、缺陷信息展示模块、缺陷列表、参考列表以及差异性报告及上下文信息。
+用户在使用该工具时，首先要选择缺陷报告的路径信息。
+基于缺陷报告，IMDisplayer工具会自动统计缺陷报告中的缺陷实例，
+并将误用API数目、缺陷实例数目展示在界面上。
+用户通过下拉菜单选择目标API，如图中所示，目标接口为\texttt{fgets()}函数。
+在用户选择目标API后，IMDisplayer工具会更新左侧的缺陷列表，以展示该接口所有误用的情况。
+此后，用户可以通过点击左侧的缺陷列表选择具体要审查的缺陷实例。
+在用户进行选择后，IMDisplayer会更新缺陷实例的原因、违反的约束，以及右侧参考列表。
+用户可以通过对参考列表中的使用实例进行选择，在缺陷展示框中，对缺陷和正确使用进行差异性对比。
+例如图中红色和绿色为缺陷发生的位置和对应的正确使用的位置。
 
-1. 规约 2. 对比。源于两方面，sec2.5被测对象认为IMSpec更有效。
-实际开发者学习到的经验，即对路径和对比的需求。
+IMDisplayer的设计动机来源于两点：
+（1）IMSpec有效性评估结果显示，相对于自然语言，IMSpec规约描述语言对接口使用约束描述更加有效，
+即开发者更容易或者使用约束的条件。
+因此，作者将缺陷所违反的IMSpec具体的约束展示在界面中，帮助开发者理解缺陷发生的原因。
+（2）在应用阶段，开发者提交缺陷报告给对应的开发者。
+最初，只提供了缺陷发生的原因和路径信息。
+开发者则表示，如果能提供过多的语义信息，有助于理解缺陷的原因。
+因此，作者扩展了缺陷分析引擎IMChecker，并设计了IMDisplayer工具。
+特别地，在分析过程中，将正确使用的路径进行记录。
+在IMDisplayer中，通过差异性比对的方式，展现缺陷和正确使用代码片段。
+不仅有效的帮助使用者理解缺陷的原因，同时提供了缺陷修复的参考代码。
+（3）IMDisplayer独立于分析引擎，通过解析缺陷报告中的标签来展示。
+因此该工具能够扩展到其他应用场景。
 
 \section{案例应用}
 \label{sec:4.4}
-\subsection{应用对象}
-1页
-(icse-tool)
-对象
+本文的工作旨在对实际项目中C程序接口缺陷进行检测，以提高代码质量，应对现代软件开发的迫切需求。
+因此，本章将Tsmar-IMChecker工具应用于广泛使用的开源项目中。
+本小结将对应用对象和方法进行介绍，并总结应用的结果。
+最后本小结讨论实际应用中的发现和不足，
+为研究人员和开发人员进一步工作提供思路。
 
-目标API
+\subsection{实验准备}
+\paragraph{应用对象}
+作者选取三个典型领域的程序作为应用对象，评估Tsmar-IMChecker工具在实际项目中的有效性。
+包括操作系统Linux内核、广泛使用的第三方库OpenSSL安全库和
+使用了第三方库的应用软件。
+其中，应用软件为Ubuntu16.04中，使用了OpenSSL安全库实现的应用软件。
+Ubuntu系统提供了多个版本的OpenSSL安全库的实现，本文采用libssl1.0.0\footnote{https://packages.ubuntu.com/xenial/libssl1.0.0}作为应用对象。
+
+应用软件的选择步骤如下。
+首先，本文通过Ubuntu系统提供的软件包依赖管理工具所搜所有使用了libssl1.0.0的应用软件，即通过如下命令，
+\begin{lstlisting}[language={bash},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.25\textwidth]
+(*@\textcolor{blue}{Ubuntu@~:}@*) apt-cache rdepends libssl1.0.0
+\end{lstlisting}
+\texttt{apt-cache rdepends}命令\footnote{http://manpages.ubuntu.com/manpages/bionic/man1/apt-rdepends.1.html}
+能够查看一个软件包被哪些软件包所依赖。
+搜索的结果显示，超过1200应用软件包依赖于libssl1.0.0。
+接着，对于这些软件包，作者在Github中搜索是否存在这些软件包。
+目的在于，确保这些应用对象然而活跃于开源社区中，同时提交的缺陷报告可以及时获得回复。
+对于软件包编译、分析需要大量的时间，
+因此本文选择了15个广泛使用、不同应用领域、开发者持续维护的应用软件，包括：
+\begin{itemize}
+	\item dma: 邮件服务，主分支，86个关注（Star数目）
+	\item exim: 邮件服务，版本4.91，393个关注
+	\item hexchat: 网络实时聊天，版本2.14.1，1949个关注
+	\item httping: 针对HTTP请求的Ping服务，主分支，302个关注
+	\item ipmitool: 针对智能平台管理接口（Intelligent Platform Management Interface，IPMI）的控制系统，主分支，122个关注
+	\item open-vm-tools: 邮件服务，版本4.91，393个关注
+	\item irssi: 邮件服务，版本4.91，393个关注
+	\item keepalive: 邮件服务，版本4.91，393个关注
+	\item thc-ipv6: 邮件服务，版本4.91，393个关注
+	\item freeradius-server: 邮件服务，版本4.91，393个关注
+	\item trfficserver: 邮件服务，版本4.91，393个关注
+	\item tinc: 邮件服务，版本4.91，393个关注
+	\item sslplit: 邮件服务，版本4.91，393个关注
+	\item rdesktop: 邮件服务，版本4.91，393个关注
+	\item proxytunnel: 邮件服务，版本4.91，393个关注
+\end{itemize}
+
+为了有效评估Tsmar-IMChecker的检测能力，所有应用对象选择了截止至2018年7月10日的最新的稳定版本，
+即Linux内核4.18-rc4，OpenSSL-1.1.1-pre8，以及Ubuntu操作系统中应用软件的主分支。
+
+\paragraph{目标API}
+
+\paragraph{实验环境}
+1页
 
 https://github.com/tomgu1991/IMChecker/tree/master/imspec
-
-平台参数
-
 
 
 \subsection{缺陷检测结果}
 %https://github.com/tomgu1991/IMChecker/blob/master/evaluation_data/new_bugs/bug_list.md
+\input{data/tab/cp4-4-target}
+
 
 总体结果
 0.5
