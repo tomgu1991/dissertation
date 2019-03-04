@@ -105,7 +105,7 @@ Gitgrabber使用方便，只需要提供基于结构化的描述的配置文件�
 basicstyle=\linespread{0.8}\listingsfont,
 numbers=none,
 xleftmargin=.3\textwidth]
-python main.py --config config.yml
+(*@\textcolor{blue}{python}@*) main.py --config config.yml
 \end{lstlisting}
 挖掘的结果包括：修改记录报告、差异性报告、修改前文件和修改后的文件。
 本文中缺陷模式调研的缺陷实例均来自于Gitgrabber的结果。
@@ -142,19 +142,136 @@ C程序接口缺陷数据集一方面能够帮助研究人员设计更具有针�
 \input{data/tab/4-2-dataset}
 \section{工具集组成}
 \label{sec:4.3}
+软件可信保障工具集Tsmart (Trustworthy Software System Modelling And Verification Toolkit)，是清华大学软件学院软件系统与工程研究所研发的软件系统建模验证工具集。
+Tsmart~\cite{tsmart}工具集在2019年1月发布第三版，是具有完全自主知识产权，面向软件代码安全可靠性的多维度保障体系。
+Tsmart具有代码合规性分析、缺陷静态检测、缺陷自动修复、并发性属性分析等功能。
+工具集可用于自动化地检测软件系统中难以发现、调试的重要缺陷，并给出相应的修复建议，从而提高软件系统的可靠性，以及软件开发测试效率，减小因为软件缺陷导致的损失。
+Tsmart-IMChecker工具集是Tsmart的重要组成部分，面向C程序接口使用缺陷设计。
+本节将对Tsmart-IMChecker的总体架构、模块组成进行介绍。
 
-
-(icse-tool)
-什么是tsmart
 \subsection{总体架构}
-1页
-\subsection{程序预处理模块}
-1页
+Tsmart-IMChecker是基于可视化支持的C程序接口缺陷检测工具集。
+如图~\ref{fig:4-3-overview}中所示，
+工具集包含三个主要模块：
+\begin{enumerate}
+	\item IMSpec规约撰写工具：IMSpec语言提供了一套轻量级、类标记语言的语法结构，
+	然而，手动撰写规约是一件耗时、容易出错的工作。因此本文设计了可视化支撑的IMSpec规约撰写工具，
+	帮助用户描述接口使用约束。
+	\item IMChecker分析引擎：本文将规模化检测方法实现于IMChecker分析引擎中，
+	并提供基于命令行的使用接口。用户可以直接调用该接口进行缺陷检测，
+	也可以将分析引擎嵌入到实际开发环境中，作为第三方插件使用。
+	\item IMDisplayer结果展示工具。Tsmart工具集提供了基于网页版的可视化结果展示工具。
+	为了帮助实际用户更好的理解接口使用缺陷发生原因，本文实现了基于差异性的结果展示工具。
+	通过在同一个项目中，正确使用实例与缺陷实例的对比，突出接口误用的缺陷原因。
+\end{enumerate}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.85\linewidth]{figures/cp4-overview.png}
+	\caption{
+		Tsmart-IMChecker工具集使用流程。
+	}
+	\label{fig:4-3-overview}
+\end{figure}
+
+用户使用Tsmart-IMChecker工具进行接口缺陷检测需要三个步骤，即
+（1）撰写规约，（2）缺陷检测，（3）结果确认。
+首先，开发者通过IMSpec规约撰写工具，对目标接口的使用约束进行描述。
+如果开发者理解IMSpec的语法结构，也可以通过直接撰写文本格式的规约描述。
+在第二步，开发者通过调用缺陷检测引擎，基于提供的规约描述对源代码进行分析。
+最后开发者可以直接通过生成的报告进行缺陷检测结果的核对，
+也可以通过可视化的IMDisplayer工具对检测结果进行确认。
+本节将在剩下的内容中，对每个模块进行详细介绍。
+
+
+
 \subsection{规约撰写模块}
-1页
+接口使用约束作为接口规约的一部分，已经被证明能能够有效的应用于软件工程领域的不同任务中。
+特别地，这些规约能够帮助开发者理解如何正确使用API，
+以及帮助测试人员对接口误用缺陷进行检测。
+然而人工撰写这些约束条件需要大量的时间与经历，
+同时容易在撰写中产生语法错误。
+为了使用者减轻撰写IMSpec约束的负担、提高撰写规约语法的准确性，
+本文设计并实现了图形化支撑的IMSpec规约撰写工具。
+
+如图~\ref{fig:4-3-IMSpec-writer}中所示，IMSpec规约撰写工具包含三个部分：
+\begin{itemize}
+	\item {\kaishu 规约列表}
+	界面的最左侧是规约列表，用于展示使用者已经完成的IMSpec接口约束实例。
+	用户可以在列表中直观地了解已经完成的约束描述。
+	\item {\kaishu 编辑区} 
+	界面的右侧为规约编辑区，用于对IMSpec规约进行编辑。
+	编辑区包括三大主要区域：目标对象区域、前置条件编写和后置条件编写区域。
+	用户在确定目标接口的名称和参数定以后，可以在下列的Ref区域选择性的填写与目标API相关的因果调用关系函数。
+	例如：目标接口时\texttt{fopen()}函数，那么用户可以在Ref区域通过填写\texttt{fclose()}函数的定义强化因果调用关系。
+	后续中，用户可以根据具体的接口使用约束，对前置条件和后置条件进行编辑。
+	特别地，IMSpec规约撰写工具在IMSpec语法基础之上，
+	在界面显示中进行了细微的调整，以提供更直观、准确的功能。
+	\item {\kaishu 文件操作区} 
+\end{itemize}
+
+用户通过命令行，执行imspec\_writer.py运行该工具：
+\begin{lstlisting}[language={bash},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.3\textwidth]
+(*@\textcolor{blue}{Ubuntu@~:Python3}@*) imspec_writer.py
+\end{lstlisting}
+其运行结果被保存在用户选择的目录中的*.yaml文件中，
+例如图~\ref{fig:2-4-example-imspec}中IMSpec实例。
+此外，为了帮助使用者维持项目特定的语义及特殊定义，
+IMSpec规约撰写工具提供了define.h文件共使用者定义宏参数。
+例如针对于图~\ref{fig:2-4-example-imspec}中IMSpec实例，
+用户可以在define.h中，定义如下宏：
+\begin{lstlisting}[language={C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.3\textwidth]
+#define SUCCESS 1
+#define FILEERR -1
+#define IOERR -2
+\end{lstlisting}
+则在后续的解析IMSpec语言时，解析会进行宏展开，以和程序中的语义保持一致。
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.85\linewidth]{figures/cp4-IMSpec-writer.png}
+	\caption{
+		IMSpec规约撰写工具截图。
+	}
+	\label{fig:4-3-IMSpec-writer}
+\end{figure}
+
+
 \subsection{缺陷检测模块}
+\begin{figure}[b]
+	\centering
+	\includegraphics[width=0.85\linewidth]{figures/cp4-IMChecker-engine.png}
+	\caption{
+		IMSpec规约撰写工具截图。
+	}
+	\label{fig:4-3-IMChecker-engine}
+\end{figure}
+为什么
+
+界面介绍
+
+输出结果
 1页
 \subsection{结果展示模块}
+\begin{figure}[b]
+	\centering
+	\includegraphics[width=0.85\linewidth]{figures/cp4-IMDisplayer.png}
+	\caption{
+		IMSpec规约撰写工具截图。
+	}
+	\label{fig:4-3-IMDisplayer}
+\end{figure}
+为什么
+
+界面介绍
+
+输出结果
 1页
 差异性结果展示模块
 
