@@ -1,0 +1,34 @@
+\begin{table}[t]
+	\centering
+	\begin{minipage}[t]{0.8\linewidth} % 如果想在表格中使用脚注，minipage是个不错的办法
+		\caption{静态分析工具对C程序接口缺陷检测能力}
+		\label{tab:3-2-survey}
+			\begin{tabular}{ccccccccccc}
+			\hline
+			\multirow{2}{*}{工具名称} & \multicolumn{2}{c}{IPU\footnote{Y：支持，P：部分支持，-：不支持}} & \multicolumn{3}{c}{IEH} & \multicolumn{3}{c}{ICC} & \multirow{2}{*}{扩展性\footnote{难：难以扩展，有限：可以扩展，扩展内容受限，-：不支持，$\checkmark$：方便扩展}} & \multirow{2}{*}{可用性\footnote{$\checkmark$：可用且基本符合预期，P：可用但与预期相差很大，-：不可用}} \\
+			\cline{2-3}\cline{4-6}\cline{7-9}
+			 & -s & -r & -c & -p & -l & -s & -c & -r & & \\
+			\hline
+			Clang-SA~\cite{clang-sa} & Y & Y & - & - & - & Y & Y & Y & 难 & $\checkmark$ \\
+			Cppcheck~\cite{cppcheck} & Y & Y & P & - & P & Y & Y & Y & 有限 & $\checkmark$ \\
+			Infer~\cite{infer} & Y & Y & - & - & - & Y & Y & Y & - & $\checkmark$ \\
+			Pinpoint~\cite{pinpoint} & Y & Y & P & - & - & Y & Y & Y & - & $\checkmark$ \\
+			Coverity~\cite{coverity} & Y & Y & Y & P & P & Y & Y & Y & 难 & $\checkmark$ \\
+			\hline 
+			SLAM~\cite{slam} & Y & Y & Y & - & - & Y & Y & Y & 有限 & $\checkmark$ \\
+			SSLINT~\cite{15-sp-sslint} & P & - & Y & - & - & Y & Y & - & 有限 & - \\
+			\hline
+			PR-Miner~\cite{05-fse-prminer} & - & - & - & - & - & Y & Y & - & - & - \\
+			RGJ07~\cite{07-PLDI-RGJ07} & Y & Y & - & - & - & Y & Y & - & - & - \\
+			Chronicler~\cite{07-icse-chronicler} & - & - & - & - & - & Y & P & - & - & - \\
+			EDP~\cite{08-fast-eio} & - & - & Y & Y & - & - & - & - & - & - \\
+			Hector~\cite{13-dsn-hector} & - & - & - & - & - & Y & P & - & - & - \\
+			Chucky~\cite{13-ccs-chucky} & P & P & Y & - & - & - & - & P &  & \checkmark \\
+			NDNR14~\cite{14-fse-pre} & P & Y & - & - & - & - & - & - & - & - \\
+			APISan~\cite{16-sec-apisan} & P & P & Y & Y & - & Y & Y & P & - & \checkmark \\
+			Antminer~\cite{16-icse-antminer}& P & P & Y & P & - & P & P & - & - & - \\
+			ErrDoc~\cite{17-fse-errdoc}& - & - & Y & Y & P & P & - & - & 有限 & P \\
+			\hline
+		\end{tabular}
+	\end{minipage}
+\end{table}

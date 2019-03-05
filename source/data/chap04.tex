@@ -588,7 +588,7 @@ OpenSSL的官方用户手册中指出，\texttt{SSL\_connect()}函数用于初�
 其中61个（81.33\%）被开发者接受，32个（42.67）已经被开发者修复。
 一方面，
 在本文分析之前，Linux内核和OpenSSL软件库作为广泛使用的基础软件，
-两者代码已经被著名的分析工具（例如，商业工具Coverity\footnote{https://scan.coverity.com/}和学术工具Clang Static Analysis）检测过。
+两者代码已经被著名的分析工具（例如，商业工具Coverity~\cite{coverity}和学术工具Clang Static Analysis）检测过。
 特别地，这些缺陷的目标API均从已有的缺陷修改记录中获得，
 即这些缺陷已经在过去发生过。
 然而，依旧存在大量的接口误用缺陷。
@@ -642,11 +642,11 @@ OpenSSL的官方用户手册中指出，\texttt{SSL\_connect()}函数用于初�
 因此，本文基于缺陷模式，设计了面向C程序接口使用约束的领域特定语言IMSpec。
 该语言旨在和现有的自然语言描述形成互补，以提供更好的描述接口使用约束。
 
-\begin{figure}[t]
+\begin{figure}[b]
 	\centering
-	\includegraphics[width=0\linewidth]{figures/cp4-exim-bug.png}
+	\includegraphics[width=\linewidth]{figures/cp4-exim-bug.png}
 	\caption{
-		OpenSSL中接口用户手册缺陷修复记录。
+		exim项目中缺陷2316修复记录。
 	}
 	\label{fig:4-4-exim-bug}
 \end{figure}
