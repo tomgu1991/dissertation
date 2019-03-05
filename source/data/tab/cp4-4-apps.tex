@@ -1,0 +1,57 @@
+\begin{table}[!b]
+	\centering
+	\setlength{\tabcolsep}{2.25pt}
+	\begin{minipage}[t]{\linewidth} % 如果想在表格中使用脚注，minipage是个不错的办法
+		\caption{Ubuntu16.04应用软件缺陷检测结果}
+		\label{tab:4-4-apps}
+		\begin{tabular}{ccclcc}
+			\hline
+			 项目 & 缺陷 & \multirow{2}{*}{误用API} & \multicolumn{1}{c}{文件位置} & 缺陷 & \multirow{2}{*}{状态\footnote{$\checkmark\checkmark$为已经修复的缺陷，$\checkmark$为确认的缺陷，$P$为未确认的缺陷。}} \\
+			名称 & 编号 & & \multicolumn{1}{c}{文件名：调用函数} & 种类 & \\
+			\hline
+dma & 59 & SSL\_connect & crypto.c: \textbf{smtp*\_crypto} & IEH & \checkmark\checkmark \\
+\cline{1-1}
+\multirow{2}{*}{exim} & 2316 & X509\_NAME\_oneline & tls-openssl.c: \textbf{x509*\_names} & IEH & \checkmark\checkmark \\
+    & 2317 & SSL\_CTX*\_list & tls-openssl.c: \textbf{tls*\_cb} & IEH & \checkmark\checkmark \\
+\cline{1-1}
+\multirow{2}{*}{hexchat} & 2244 & BN\_set\_word & dh1080.c: \textbf{dh1080\_init} & IEH & \checkmark \\
+    & 2245 & DH\_set0\_key & dh1080.c: \textbf{dh1080\_compute\_key} & IEH & $P$ \\
+\cline{1-1}
+\multirow{1}{*}{httping} & 41 & SSL\_CTX\_new & mssl.c: \textbf{initialize\_ctx} & ICC & \checkmark \\
+\cline{1-1}
+\multirow{1}{*}{ipmitool} & 37 & MD2\_Init & auth.c: \textbf{ipmi\_auth\_md2} & IEH & \checkmark \\
+\cline{1-1}
+\multirow{1}{*}{open-} & 291 & SSL\_*list & sslDirect.c: \textbf{SSL\_NewContext} & IEH & \checkmark\checkmark \\
+vm-tools & 292 & X509*\_current\_cert & certverify.c: \textbf{VerifyCallback} & IPU & \checkmark\checkmark \\
+\cline{1-1}
+\multirow{2}{*}{irssi} & 943 & SSL*\_certificate & net*-openssl.c: \textbf{irssi*\_handshake} & IPU & $P$ \\
+    & 944 & BIO\_read & certverify.c: \textbf{set*\_info} & IEH & $P$ \\
+\cline{1-1}
+\multirow{2}{*}{keepalive} & 1003 & SSL*\_new & ssl.c: \textbf{build*\_ctx} & ICC & \checkmark\checkmark \\
+    & 1004 & SSL\_new & ssl.c: \textbf{ssl\_connect} & ICC & \checkmark\checkmark \\
+\cline{1-1}
+\multirow{2}{*}{thc-ipv6} & 28 & BN\_new & thc-ipv6-lib.c: \textbf{thc\_memstr} & ICC & \checkmark\checkmark \\
+    & 29 & BN\_set\_word & thc-ipv6-lib.c: \textbf{thc\_memstr} & IEH & \checkmark\checkmark \\
+\cline{1-1}
+\multirow{2}{*}{FreeRADIUS} & 2309 & BIO\_new & session.c: \textbf{tls*\_cert} & ICC & \checkmark\checkmark \\
+    & 2310 & i2a\_ASN1\_OBJECT & session.c: \textbf{tls*\_cert} & IEH & \checkmark\checkmark \\
+\cline{1-1}
+\multirow{3}{*}{trafficserver} & 4292 & SSL\_CTX\_new & http\_load.c: \textbf{handle\_connect} & ICC & $P$ \\
+    & 4293 & SSL\_new & http\_load.c: \textbf{handle\_connect} & ICC & $P$ \\
+    & 4294 & SSL\_write & http\_load.c: \textbf{handle\_connect} & IEH & $P$ \\
+\cline{1-1}
+\multirow{2}{*}{tinc} & 205 & BN\_hex2bn & tincd.c: \textbf{keygen} & IPU & \checkmark\checkmark \\
+    & 206 & RAND\_load\_file & tincd.c: \textbf{main} & IEH & \checkmark\checkmark \\
+\cline{1-1}
+\multirow{2}{*}{sslsplit} & 224 & SSL*\_certificate & pxyconn.c: \textbf{pxy*\_create} & IEH & \checkmark\checkmark \\
+    & 225 & SSL*\_PrivateKey & pxyconn.c: \textbf{pxy*\_create} & IEH & \checkmark\checkmark \\
+\cline{1-1}
+\multirow{2}{*}{rdesktop} & 280 & BN\_bin2bn& ssl.c: \textbf{rdssl*\_encrypt} & IEH & $P$ \\
+    & 281 & BN\_mod\_exp & ssl.c: \textbf{rdssl*\_encrypt} & IEH & $P$ \\
+\cline{1-1}
+\multirow{2}{*}{proxytunnel} & 36 & SSL\_connect & ptstream.c: \textbf{stream*\_ssl} & IEH & $P$ \\
+    & 37 & SSL\_new& ptstream.c: \textbf{stream*\_ssl} & ICC & $P$ \\
+			\hline
+		\end{tabular}
+	\end{minipage}
+\end{table}

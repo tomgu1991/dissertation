@@ -461,7 +461,8 @@ Tsmart-IMChecker工具针对于上述17个开源项目的应用结果如表~\ref
 在第二列中，对缺陷报告总数进行展示。
 第三列和第四列分别给出在报告的缺陷中，开发者已经确认但没有修复的个数，
 以及开发者确认并且修复的缺陷报告个数。
-表中数据显示，Tsmart-IMChecker工具共在17个项目中发现75个实际接口误用缺陷。
+在所有检测的结果中，本文作者过滤后
+在17个项目中共提交了75个实际接口误用缺陷。
 其中Linux内核具有30个，25个已经被开发者确认，5个已经在最新的代码中进行修复与集成。
 OpenSSL共检测出17个缺陷，全部被开发者确认，其中12个已经被修复并集成到主分支和发布版本中。
 Ubuntu系统中的应用软件分别检测到1-3个缺陷，每个项目具体数据如表中所示。
@@ -472,7 +473,7 @@ Ubuntu系统中的应用软件分别检测到1-3个缺陷，每个项目具体�
 
 \paragraph{Linux内核}
 如表~\ref{tab:4-4-linux}中所示，在Linux内核中，
-Tsmart-IMChecker工具共发现30个未被报告的接口缺陷。
+Tsmart-IMChecker工具共提交30个未被报告的接口缺陷。
 针对于每一个缺陷报告，本文作者首先在Linux的缺陷报告系统\footnote{https://bugzilla.kernel.org}中进行查询，
 是否已经有开发者进行提交。
 如果没有，则对缺陷报告进行提交。
@@ -489,28 +490,8 @@ Tsmart-IMChecker工具共发现30个未被报告的接口缺陷。
 	\label{fig:4-4-linux-example}
 \end{figure}
 
-\begin{figure}[b]
-	\centering
-	\begin{lstlisting}
-"summary": "fix setting of 'ret' error return for a few cases",
-"date": "2018-08-162018-08-16",
-"author": "Jens Axboe",
-drivers/block/pktcdvd.c
-=======================================================
-@@ -2740,6 +2740,7 @@ static int pkt_setup_dev(dev_t dev, dev_t* pkt_dev)
-pd->write_congestion_on  = write_congestion_on;
-pd->write_congestion_off = write_congestion_off;
+\input{data/code/cp4-4-linux-example-fix}
 
-+	ret = -ENOMEM;
-	disk = alloc_disk(1);
-	if (!disk)
-		goto out_mem;
-	\end{lstlisting}
-	\caption{
-		Linux接口缺陷200505修复细节。
-	}
-	\label{fig:4-4-linux-example-fix}
-\end{figure}
 
 如图~\ref{fig:4-4-linux-example}为作者将误用接口\texttt{alloc\_disk()}的缺陷实例提交，以及修复的记录截图。
 根据Linux中错误处理机制，接口\texttt{alloc\_disk()}出错时，外层调用者需要返回\textbf{-ENOMEM}来表示内存不足的错误信息。
@@ -523,31 +504,220 @@ pd->write_congestion_off = write_congestion_off;
 即在返回之前对返回值赋值为的错误代码\textbf{-ENOMEM}。
 
 
-
 \paragraph{OpenSSL}
-2页
+\input{data/tab/cp4-4-openssl}
+
+如表~\ref{tab:4-4-openssl}中所示，在OpenSSL中，Tsmart-IMChecker工具共提交17个未被报告的接口缺陷。
+针对于每一个缺陷报告，本文作者首先在Github中OpenSSL代码库中提交Issue。
+在提交报告给开发者后，所有的缺陷报告都获得了开发者的回复。
+其中12个已经被维护者修复并集成在主分支内，5个被标记为待评估（Assessed）。
+OpenSSL与Linux内核的缺陷报告系统不同，基于Github的Issue系统维护。
+因此，缺陷的提交和修复往往能够获得及时的反馈。
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/cp4-openssl-example.png}
+	\caption{
+		OpenSSL缺陷6781提交和修复记录。
+	}
+	\label{fig:4-4-openssl-example}
+\end{figure}
+
+图~\ref{fig:4-4-openssl-example}是作者在OpenSSL项目检测到的一个内存泄漏缺陷。
+OpenSSL设计了\texttt{EC\_GROUP\_new\_by\_curve\_name()}来创建EC\_GROUP对象。
+该对象在声明周期结束后需要通过\texttt{EC\_GROUP\_free()}进行释放。
+然而在ec\_ameth.c文件的\texttt{eckey\_type2param()}中，在一条错误路径上，
+开发者并没有进行释放，导致一个内存泄漏错误。
+如图~\ref{fig:4-4-openssl-example-fix}中所示，
+开发者在12行进行了内存对象的申请，然而在16行的if判断错误处理中，
+直接通过goto语句跳转到21行继续执行。
+因此这条异常处理路径上，忽视了对于12行申请的内存对象\texttt{group}的释放。
+在作者提交缺陷报告，并说明出错路径后，开发者在12小时内完成修复。
+修复细节如图~\ref{fig:4-4-openssl-example-fix}所示。
+OpenSSL项目设计了明确的错误代码机制，并在用户手册中提供基于自然语言的描述。
+然而，项目的开发者却忽略了大量的异常处理检测。
+例如，缺陷6569、6572、6798和6982，均由不正确的异常处理原因，导致的软件缺陷。
+作者在提交缺陷报告后，开发者均进行了相应的修复。
+
+
+\input{data/code/cp4-4-openssl-example-fix}
 
 \paragraph{应用程序}
-2页
+\input{data/tab/cp4-4-apps}
 
-每类缺陷举例子
-代码+回复
+OpenSSL软件库是网络通信领域广泛使用的安全库，这些接口误用会极大地损害系统的可靠性。
+因此，对OpenSSL项目中接口缺陷检测本身具有重要意义。
+一方面，可以提高软件库本身的质量。
+另一方面，通过完善软件库代码的质量，能够有效为使用者提供可靠的用例。
+我们在Ubuntu16.04的应用软件中，对OpenSSL软件库接口缺陷进行检查，
+并将28检测结果提交给对应的15个项目中。
+如表~\ref{tab:4-4-apps}所示，28个缺陷中，18个被开发者接受，15个已经被成功修复。
 
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/cp4-dma-example.png}
+	\caption{
+		dma缺陷59提交和修复记录。
+	}
+	\label{fig:4-4-dma-example}
+\end{figure}
 
-\subsection{开源社区反馈}
-%https://github.com/tomgu1991/IMChecker/blob/master/evaluation_data/new_bugs/bug_list.md
-1. 感谢
-0.5页
+图~\ref{fig:4-4-dma-example}是作者在dma项目检测到的一个不正确的异常处理错误。
+OpenSSL的官方用户手册中指出，\texttt{SSL\_connect()}函数用于初始化TSL/SSL服务器握手操作（handshake）。
+根据TSL/SSL协议本身，当握手失败时，返回0代表链接被成功关闭，返回负数代表错误发生在协议层、链接等等。
+所以该函数的异常处理需要考虑两种情况。
+然而在dma项目中，开发者只对负数进行了检查，而忽略了0的情况。
+导致项目的异常处理机制被破坏，如图中所示，没有正确的进行异常输出，返回对应的返回值。
+本文作者在提交缺陷报告后，开发进行了对应的修复。
+虽然有些项目对缺陷报告没有确认，但这些报告处于没有恢复的阶段，即开发者并没有否定检测结果为误报。
+同时，相应的缺陷模式已经在其他的项目中获得认可。
+因此本文认为，这些缺陷具有极高的可信度。
 
-2. 新的Bugchecker
-0.5页
-
-3. keepalive的后续
-0.5页
 
 \subsection{应用经验总结}
+本文将Tsmart-IMChecker应用于实际开源项目中，对接口缺陷进行分析，
+并将缺陷报告提交给相应的开发者。
+作者将缺陷检测、报告提交、开发者讨论和后续跟进工作中，
+遇到的困难、总结的发现和项目应用经验总结下文中。
+主要包括如下几个方面：
+接口缺陷、现有文档、缺陷提交和开发者态度。
 
-3页
+\paragraph{接口缺陷}
+接口误用缺陷并不是个例，普遍存在于各种软件系统中。
+特别地，本文共找到超过300个实际缺陷，并提交了75个高置信度的缺陷报告。
+其中61个（81.33\%）被开发者接受，32个（42.67）已经被开发者修复。
+一方面，
+在本文分析之前，Linux内核和OpenSSL软件库作为广泛使用的基础软件，
+两者代码已经被著名的分析工具（例如，商业工具Coverity\footnote{https://scan.coverity.com/}和学术工具Clang Static Analysis）检测过。
+特别地，这些缺陷的目标API均从已有的缺陷修改记录中获得，
+即这些缺陷已经在过去发生过。
+然而，依旧存在大量的接口误用缺陷。
+另一方面，被分析的应用软件中，每个都至少误用了一个OpenSSL的接口。
+我们在后续的研究中，在其他的应用软件中发现了同样的现象。
+在对缺陷模式、细节分析后，本文发现这些缺陷产生存在两方面的原因：
+（1）软件库开发者间缺少缺陷报告分享机制。
+开发者经常会忘记接口使用的约束。
+特别地，即使新的代码中存在和过去发生的缺陷的模式一样，
+并没有一个能够自动检测的方法，对开发者进行提示。
+（2）客户端开发者缺少足够的领域知识，导致误用库函数。
+即，客户端开发者在使用OpenSSL软件库时，没有深入理解或者参考文档，
+导致接口使用错误。
+
+总结来说，开发者在开发过程中，难免会产生接口误用，无论是无意忘记约束、缺少理解。
+因此，Tsmart-IMChecker规模化、高效的分析工具对接口误用缺陷检测具有重要实际意义。
+特别地，Tsmart-IMChecker基于规约描述语言进行检测，
+容易扩展并集成领域知识。
+同时可以渐进式的分析，即可以只应用于新修改的代码中。
+\begin{figure}[b]
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/cp4-doc-bug.png}
+	\caption{
+		OpenSSL中接口用户手册缺陷修复记录。
+	}
+	\label{fig:4-4-doc-bug}
+\end{figure}
+\paragraph{现有文档}
+虽然OpenSSL软件库提供了格式优良的自然语言描述的接口使用约束和解释，
+然而在本文分析的15个应用软件中，依旧存在大量的接口误用缺陷。
+对缺陷报告和文档进行分析后，现有的文档存在如下几个不足：
+\begin{itemize}
+	\item 文档自身存在错误。在OpenSSL的缺陷检测中，本文发现OpenSSL提供的官方文档中存在错误。
+	在进行代码具体使用情况和文档描述后，作者提交了文档和接口缺陷报告（Issue-6569）。
+	开发者在收到缺陷报告后，1天内对文档进行了修复，如图~\ref{fig:4-4-doc-bug}中所示。
+	\item 文档利用率不足。一方面，软件库项目代码中本身存在接口误用。
+	另一方面，客户端开发者则误用这些接口。
+	在和开发者讨论原因时，超过一半的开发者表示，在遇到使用问题时更喜欢去Google或者Stack-overflow中搜索，
+	而不是参考官方文档。
+	\item 客户端未能感知软件库的更新。
+	如图~\ref{fig:4-4-exim-bug}中所示，在exim项目中，作者在提交缺陷报告（ID-2316\footnote{https://bugs.exim.org/show\_bug.cgi?id=2316}）后，开发者根据旧版本的用户手册认为缺陷不成立。
+	然而，在OpenSSL最新的用户手册和最新的代码中，已经对相应的接口进行更新。
+	在提交相应的说明后，开发者对缺陷修复。
+\end{itemize}
+
+总结来说，即使现有的软件库提供了格式良好的使用测试和参考用例，
+开发者在遇到问题时，依旧首选网络平台进行咨询。
+然而，根据调研~\cite{18-icse-stack}显示，网络平台中的代码质量并不可靠。
+特别地，随时开源软件社区的蓬勃发展，大量的软件库缺少文档。
+所以，现有的文档形式，难以满足用户的需求。
+因此，本文基于缺陷模式，设计了面向C程序接口使用约束的领域特定语言IMSpec。
+该语言旨在和现有的自然语言描述形成互补，以提供更好的描述接口使用约束。
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0\linewidth]{figures/cp4-exim-bug.png}
+	\caption{
+		OpenSSL中接口用户手册缺陷修复记录。
+	}
+	\label{fig:4-4-exim-bug}
+\end{figure}
+
+\paragraph{缺陷提交}
+在缺陷检测后，本文作者针对于选择的缺陷细节进行深入分析，并提交缺陷报告给相应的开发者。
+期初，在缺陷报告中只包含错误的位置和原因。
+开发者很少反馈，或者希望作者提供更多的有效信息。
+在此基础之上，作者丰富了缺陷报告，在报告中包含：缺陷位置、原因、具体路径信息和对比正确使用片段，
+供开发者更好的理解缺陷。
+面对改进后的缺陷报告，提交的多数报告被开发者接受与修复。
+作者将缺陷报告提交中的经验总结如下：
+\begin{itemize}
+	\item 开发者更喜欢提交代码修复（Pull Request）。
+	在缺陷提交的过程中，Linux内核的维护者表示只接受修复提交，
+	Ubuntu的应用软件的开发者则更欢迎提交修复代码。
+	相对的，OpenSSL开发者积极的在帮助作者进行缺陷修复。
+	\item 提交策略。
+	在缺陷报告提交初期，本文作者连续的提交数十个缺陷报告。
+	获得回复较少，一个可能的原因为，开发者认为这样的缺陷报告是批量产生，质量不高。
+	此后，作者降低提交频率。不仅获得了较多回复，同时缺陷的认可和修复率都提高。
+	\item 缺陷报告信息要充分。
+	如上文所述，丰富缺陷报告信息，能够有效的帮助开发者理解缺陷。
+\end{itemize}
+
+总结来说，缺陷提交需要大量的人力进行信息正确和确认。
+在提交过程中，作者发现开发者更喜欢接收修复代码。
+然而，缺陷修复需要大量的领域知识和上下文信息。
+此外基于差异性的路径信息能够有效的帮助开发者理解缺陷原因，提供缺陷修复模式。
+因此，在Tsmart-IMChecker工具集中，本文实现了基于差异性对比的缺陷结果展示工具IMDisplayer。
+
+\begin{figure}[b]
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/cp4-keepalived-fix.png}
+	\caption{
+		OpenSSL中接口用户手册缺陷修复记录。
+	}
+	\label{fig:4-4-keepalived-fix}
+\end{figure}
+
+\paragraph{开发者态度}
+在缺陷报告的过程中，开发者展现了不同的态度。
+一方面，开发对缺陷报告进行积极响应，例如OpenSSL的开发者多数在1天就就完成了缺陷的修复。
+另一方面，开发者则更希望作者提供实际的运行轨迹或者提供修复代码，而不仅仅是缺陷报告。
+特别地，本文将与开发者的交流和讨论中特殊发现总结如下，
+\begin{itemize}
+	\item 开发者自身忽视接口使用的约束。
+	在实际开发过程中，开发者难以做到完全正确。
+	即使是简单的参数检查和返回值检查，在大量的代码中，普遍存在这种缺陷。
+	然而，这些缺陷难以通过人工的方式进行一一排查。
+	特别地，当开发者认识到这些缺陷时，会对其他代码中同样的缺陷模式进行检测。
+	如图~\ref{fig:4-4-keepalived-fix}所示，在keepalived项目中，在作者提交缺陷报告后，开发者不仅修复了对应的缺陷，还对其他的代码进行了类似缺陷的检测和修复。
+	\item 特殊目的。
+	虽然有些接口误用确实为缺陷，但是是开发者故意为之或者在特殊的应用内，无需修复。
+	例如OpenSSL项目，提供了app/speed.c文件用于测试算法速度。
+	因此在代码中，存在大量的缺少必要返回值检查的接口误用（IssueID-6575）。
+	OpenSSL一个开发者认为这些误用在这个上下文中并不需要关注。
+	然而，其他开发者认为这部分代码作为应用中的案例，是其他开发者的重要参考，需要重视。
+	开发者进行了深入的讨论后，决定在后续的开发过程中进行统一处理（Assessed）。
+	另一方面，由于C程序缺少异常处理机制，开发者会故意忽略部分异常检测。
+	因为，软件设计时，本身就没有考虑这些情况。
+\end{itemize}
+
+总结来说，基于有效信息的缺陷报告能够获得开发者积极的反馈。
+并不是所有的接口误用都会引起开发者的关注。
+特别地，有一些误用是开发者故意为之。
+例如，提高运行效率、C程序无法支持的异常处理情况和接口本身的特殊性等等。
+
+
+
+
 
 \section{本章小结}
 \label{sec:4.5}

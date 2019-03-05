@@ -1,0 +1,33 @@
+\begin{figure}[!b]
+	\centering
+	\begin{lstlisting}
+(*@\textcolor{black}{"summary": "Avoid memory leak on failure path.Thanks to Jiecheng Wu, Zuxing Gu for the report.",}@*)
+"date": "2018-07-26",
+"author": "richsalz",
+=======================================================
+@@ -122,13 +122,12 @@ static TLS_FEATURE *v2i_TLS_FEATURE(const X509V3_EXT_METHOD *method,
++   EC_GROUP *group = NULL;
+	[...]
+	else if (ptype == V_ASN1_OBJECT) {
+		const ASN1_OBJECT *poid = pval;
+-		EC_GROUP *group;
+		[...]
+		group = EC_GROUP_new_by_curve_name(OBJ_obj2nid(poid));
+		if (group == NULL)
+			goto ecerr;
+		EC_GROUP_set_asn1_flag(group, OPENSSL_EC_NAMED_CURVE);
+		if (EC_KEY_set_group(eckey, group) == 0)
+			goto ecerr;
+		EC_GROUP_free(group);
+	} else {
+	[...]
+ecerr:
+	EC_KEY_free(eckey);
++	EC_GROUP_free(group);
+	return NULL;
+	\end{lstlisting}
+	\caption{
+		OpenSSL缺陷6781修复细节。
+	}
+	\label{fig:4-4-openssl-example-fix}
+\end{figure}
