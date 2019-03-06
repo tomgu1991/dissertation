@@ -544,113 +544,73 @@ xleftmargin=.2\textwidth]
 
 \input{data/tab/cp3-4-other}
 
-we observe that Clang-SA fails in IEH. To find
-the reasons, we investigated the cases and algorithms behind
-the tools. Clang-SA provides many checkers targeted at finding
-API usage bugs 8 (e.g., security.insecureAPI.UncheckedReturn
-is built on uses of functions whose return values must always
-be checked), but it fails to detect the error handling bugs.
-Similar to most universal static analysis tools, it hard-codes
-the detection algorithm and fails to support the APIs in this
-dataset, which is extremely severe for the project-specific
-APIs. Unfortunately, we find it difficult to extend these checkers
-to project-specific APIs, such as providing a configuration
-or target API lists. By contrast, Cppcheck and IMSpec provide
-a specification language to address this problem. However, Cppcheck
-only supports syntactic checking, resulting in missing
-bugs in a complex context. Compared to these two tools, we
-find 991-1199 more bugs, improving the recall up to 49.41-
-52.36%.
-From the precision result, we find IMSpec achieves a better
-precision than Clang-SA. The improvement is due to the rich
-semantics captured by our static analysis engine. In contrast,
-Clang-SA performs bug detection by diverse domain-specific
-checkers (e.g. unix.API checks calls to various UNIX/POSIX
-functions). However, each checker maintains its own abstract
-states. Thus, it will generate false positives and miss real
-bugs when the analysis requires deep semantics from multiple
-domains. For example, pointer analysis usually needs intervals
-to calculate an explicit offset. Cppcheck achieves the highest
-precision, for it prefers a conservative strategy, where it only
-reports the bugs with high confidence, resulting a low recall.
+表~\ref{tab:3-4-other}中总结了四个工具评测结果。
+其中Cppcheck的检测精度最高，达到了89.95\%。
+其次是IMChecker为86.79\%和Clang-SA为76.75\%。
+APISan的准确率最低，为62.66\%。
+在检测能力方面，IMChecker的召回率最高，为83.20\%。
+其他三个工具的检测能力则相对较低，在30-35\%之间。
 
-APISan detects API misuses by inferring usage constraints
-through semantic cross-checking. However, it fails to consider
-11.43% double-free bugs of single-file ICC cases with negative
-association pattern like A ! :B (i.e., when A appears, B
-should not appear). Moreover, it requires sufficient data to
-learn the correct usage patterns, (i.e., more correct usages
-comparing to misuses). Unfortunately, 22% of the cases in
-real-world programs cannot satisfy the minimum support value
-(i.e., at least three invocations with two correct usages).
-Finding 8: APISan fails to support 22% real-world APImisuse
-bugs because of insufficient data to learn the
-correct usage patterns.
+APISan工具基于推理的方式学习接口使用的约束，
+并根据语义的差异性对缺陷进行检测。
+与基于数据挖掘技术的检测方法一直，
+工具的检测能力由预先定义的缺陷模式决定。
+APISan工具封装了$A \rightarrow B$的使用约束，
+即A调用后需要调用B接口。
+然而，并没有对$A \rightarrow \neg B$模式进行定义。
+因此该工具忽略了所有的重复释放（double free）用例，
+占有ICC分类的11.43\%。
+此外，APISan的学习结果无法保存和跨项目使用。
+因此，只能针对于单个测试用例或者项目进行分析。
+当缺少足够的数据对接口使用约束条件进行学习时，
+APISan将无法获得正确的使用约束。
+这导致APISan无法支持11.11\%的缺陷用例。
+另一方面，基于挖掘技术的方法多基于程序的语法形式分析，
+无法支持隐含的语义信息。
+例如，能够学习显示的语义信息，包括if语句中的条件判断、函数调用、返回值等等。
+却无法推理出隐式的语义约束。
+例如，不包含显示检查的内存读写接口中参数的关系。
+另外，有一些语义信息无法通过C语言描述，则必然会被这些工具忽略。
+例如，释放非堆内存错误，
+程序需要对\texttt{free}的参数所指向的内存区域进行深入的语义分析。
 
-Clang-SA and Cppcheck encode API usage specifications
-into individual checkers. Even though Clang-SA provides
-diverse checkers, none of them is designed to validate the error
-status code, resulting in missing all 612 IEH cases. Projectspecific
-APIs usually have similar behaviors to C Standard
-Library. For example, functions named *\_new are usually
-designed to allocate resources. Therefore, it needs to release
-the resources after its lifecycle. Without interfaces to specify
-specifications of these APIs, Clang-SA has a limited capability
-in real-world programs and only supports 19% of real-world
-cases misusing APIs provided by C Standard Library. By providing
-an interface to define project-specific usage constraints
-in an XML-format configuration, Cppcheck supports 54%
-more bugs compared to Clang-SA as well as itself without
-configurations. However, it fails to provide a mechanism to
-specify the concrete error status code checking (e.g., return
-value of f should be -1 or -2). Moreover, Cppcheck does
-not support the context constraints between parameters of
-two functions (e.g. fNew(p1; p2) ! fFree(p2) where the
-resource allocated into p2 by fNew() should be released by
-fFree()).
+Clang-SA和Cppcheck工具将接口使用约束编码在独立的检测插件中，
+在程序分析的过程中，对缺陷直接检测。
+Clang-SA提供了各种针对于不同缺陷类型的检测插件。
+例如，security.insecureAPI.UncheckedReturn插件用来检测忽略了对函数返回值检测的接口误用缺陷。
+然而，并没有一个插件能够支持测试用例中IEH缺陷，
+导致Clang-SA漏报了搜有的缺陷。
 
-Table V shows that Cppcheck and Clang-SA have a quite
-low recall value (17-54% lower than conceptual recall), but
-achieves a higher precision value compared to its recall.
-Particularly, Cppcheck achieves the best precision of 89.95%
-in single-file cases and 86.36% in real-world project cases.
-We find that these two tools prefer a conservative strategy,
-i.e., they only report the bugs with high confidence to improve
-usage experience [32]. Therefore, API misuses with same root
-causes in a complex program structure may be ignored.
+项目特定的接口经常会和C标准库中的接口具有相同的使用约束。
+例如，用户自定义的\texttt{*\_new}接口，与\texttt{malloc}行为一致，
+对资源进行管理。
+在资源生命周期结束后，需要进行释放操作。
+没有提供可扩展的静态分析工具则无法对这类接口进行分析。
+因此，Clang-SA难以支持所有的缺陷用例。
+Cppcheck提供了面向特定项目的规约描述方法，以支持用户自定义的接口。
+然而，该语言的描述能力不足，检测能力提升有限。
+例如，Cppcheck只支持对常量的返回值进行定义，
+且不能够描述带有上下文语义的函数调用。
 
-Similar to many tools based on mining techniques, APISan
-searches the program for explicit constraints in if-statements,
-function calls or return statements. However, when such con-straints hide into the context and require semantic reasoning,
-APISan fails to learn them. Therefore, APISan fails to detect
-all IPU cases (23.48% of single-file cases). Moreover, some
-program properties cannot be explicitly represented in C
-syntax, such as misuses caused by “cwe590-free of memory
-not on the heap” in IPU, where it has to reason the context of
-the pointer to find where it points.9
+从表~\ref{tab:3-4-other}中本文发现，相对于高检测精度，
+Clang-SA和Cppcheck的召回率非常底。
+在对两个工具的原理和测试后，
+本文发现两个工具采取了一种保守策略。
+即，为了提高检测精度，增加工具的友好性，只对具有高可能性的缺陷进行报告。
+因此，相同的缺陷模式在复杂的代码结构中将会被忽视。
 
-For all of the three detectors, the investigation results show
-that a large proportion of false positives and false negatives are
-caused by imprecise semantic analysis. (For the conservative
-strategy, we fail to count the concrete number.) In details,
-it consists of two perspectives: (1) Lack of path-sensitive
-semantics. Computing path reachabilities in static analysis
-is necessary. For example, it does not require to free()
-resource along the path where malloc() fails to allocate
-heap memory. Otherwise, it will produce a false positive. However,
-when a program catches an exception in the procedure
-after the memory allocation, it needs to take each path into
-consideration instead of matching malloc/free invocation
-counts. Because it demands to free the memory along each
-error handling path. (2) Lack of inter-procedural semantics.
-When the API usages cross functions (e.g., malloc() and
-free() are called in two callers), lack of inter-procedural
-analysis will produce a false positive of memory leak bug. In
-addition, APISan relies on static analysis to extract its usage
-representations. Imprecisions in these analyses may obscure
-relations between patterns and usages. Therefore, APISan fails
-to report 51% (78-27) of project cases because of the failure
-of correctly extracting usage contexts.
+对于三个比较的工具，在深入分析实验结果后本文发现，
+与IMChecker相比这些工具对语义分析不足，导致了大量的漏报。
+（1）缺少路径敏感度分析（path-sensitive）。
+对路径的可达性分析在静态分析中具有重要意义。
+例如，在\texttt{malloc}内存申请成功后，当某条异常处理路径上没有释放内存时，
+将会产生一个内存泄漏错误。
+然而，当申请失败时，则不需要释放。
+因此，分析需要对路径信息进行维护和记录，而不是简单的通过调用次数进行缺陷检测。
+（2）缺少过程间分析（inter-procedural）。
+当接口使用跨越函数调用时，需要基于过程间信息来进行程序分析。
+例如，\texttt{malloc/free}在两个函数中。
+
 
 综上所述，在测试集上IMChecker取得了86.79\%的检测精度和83.20\%的召回率。
 检测能力优于比较的三个知名工具。
