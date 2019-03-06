@@ -191,6 +191,8 @@ Errdoc工具在适用时，作者发现其与论文描述差距较大。
 介绍CFA，给一个图
 1页
 
+对于命令式语言的程序可以用控制流自动机(Control-flow Automaton，CFA) cxP3.3.1
+
 多入口分析策略cx89
 0.5页
 
@@ -223,8 +225,8 @@ Errdoc工具在适用时，作者发现其与论文描述差距较大。
 1.5页
 \section{工具实现与实验评估}
 \label{sec:3.4}
-本节首先介绍IMChecker规模化接口缺陷检测方法的实现细节。
-随后在公开数据集上，对IMChecker的分析能力进行评估，并给出与主流开源工具比较结果。
+本节首先介绍规模化接口缺陷检测方法IMChecker的实现细节。
+随后在公开数据集上，对IMChecker的分析能力进行评估，并给出IMChecker与主流开源工具的比较结果。
 
 \begin{figure}[t]
 	\centering
@@ -238,6 +240,8 @@ Errdoc工具在适用时，作者发现其与论文描述差距较大。
 \subsection{工具实现}
 IMChecker基于Java语言实现，依赖于LLVM3.9的IR作为分析的中间表达，
 并基于CPA~\cite{07-cav-cpachecker}算法作为整体方法的实现基础。
+工具接口用户提供的源代码和IMSpec规约描述作为输入。
+其中IMSpec实例和缺陷检测结果都基于Yaml~\cite{yaml}格式存储。
 工具实现的内部结构如图~\ref{fig:3-4-implementation}所示。
 工具共包含四个层次：基础层、架构层、算法层和应用层。
 首先，基础层通过对源代码处理，生成LLVM-IR中间表达；并对IMSpec规约描述进行解析和一致性分析。
@@ -283,33 +287,375 @@ IMSpec语言针对于单个目标API设计，所以如果规约中存在语法�
 后者表示函数调用和循环关系。
 因此，通过摘要边，在分析中可以利用摘要信息跳过函数展开和循环遍历，
 在保证大规模代码有效分析的同时增加分析精度。
-
+IMChecker基于过程（Phase）来运行，即每个过程复杂不同的预处理或者检测步骤。
+所以，框架层中实现了过程管理的调度器。
+特别地，IMChecker基于CPA算法来实现具体的路径抽取和缺陷检测。
+因此IMChecker在框架层实现了CPA算法的核心数据结构和基础调度算法。
+具体的每一个CPA则在算法层中实现。
 
 \paragraph{算法层}
+算法层旨在实现具体的算法细节。
+IMChecker针对C程序接口使用缺陷进行检测，在整个分析过程中可以分为三个阶段：
+路径收集、摘要计算和缺陷检测。
+\begin{itemize}
+	\item {\kaishu 路径收集} 在路径收集阶段，IMChecker利用CFA构造算法，对框架层的CFA原型进行优化。
+	特别地，为了支持大规模程序分析，IMChecker基于入口分析。
+	因此，在这个阶段对入口进行标记。
+	此后，基于优化后的CFA图结构，通过第~\ref{sec:3.3}节中的路径抽取方法，
+	收集路径信息，为后续两个步骤做准备。
+	目前IMChecker基于AccesPath~\cite{15-ase-accesspath}和整数分析对语义信息进行计算。
+	\item {\kaishu 摘要计算} 
+	摘要计算的结果应用于缺陷检测当中，在实现上，IMChecker则先进行摘要的计算。
+	为了支持大规模程序检测，IMChecker采用了基于多入口分析的策略，使得分析精度下降，
+	导致大量误报。
+	为了提供更加准确的检测结果，IMCHecker利用上下文语义信息对结果进行过滤。
+	具体而言，IMChecker计算：上下文指针常量计算、整数常量计算、参数约束关系、
+	返回值常量关系和函数调用关系的摘要信息。
+	\item {\kaishu 缺陷检测} 
+	缺陷检测部分，IMChecker实现了基于路径信息匹配的接口缺陷检测算法。
+	特别地，为了提高检测精度，IMChecker实现了检测算法调度器。
+	即，根据使用约束的不同，调用不同的检测算法的实现，以精确分析程序进行缺陷检测。
+	最后，利用基于语义的摘要信息和基于使用情况的统计信息对结果过滤。
+\end{itemize}
+
 
 \paragraph{应用层}
+应用层旨在从方法实际程序运行的角度，对IMChecker进行封装和优化。
+一方面，应用层实现了多入口选择算法和调度引擎。
+通过该模块，具体执行每个入口的分析。
+另一方面，对于检测后的缺陷，生成相应的缺陷报告。
+包括，缺陷产生的路径信息、违反的规约描述和具体约束条件的IMSpec形式和自然语言解释。
+特别地，IMChecker基于使用情况对缺陷检测结果进行排序。
+目前，在满足最低使用次数（Minimum Support）的情况下，
+IMChecker认为误用次数与使用次数的比例越小（Confidence）。
+即该缺陷与大多数使用不一致，则该检测结果越有可能是缺陷。
+
+IMChecker已经集成在Tsmart工具集中~\cite{tsmart}，工具使用的具体细节将在第~\ref{sec:4.3}中进行介绍。
+
+\subsection{实验准备}
+
+\paragraph{测试集} 由于目前并没有针对C程序接口缺陷检测的测试集合，
+因此作者基于美国国家标准技术研究所(NIST) 整理的Juliet Test Suite测试集~\cite{juliet}，
+对IMChecker的分析能力进行评估。
+该测试集合包含超过6万个C/C++用例，涵盖118个不同的CWE缺陷类型，
+是目前最为广泛使用的测试集。
+本文根据接口缺陷模式共选取了13个具体的分类。
+Juliet测试集合每个分类中给出了大量的重复模式的测试用例，和不同的产生原因。
+因此，作者对其中重复的用例进行过滤，保留由于接口误用导致错误的测试用例。
+同时，对每个分类中的缺陷实例进行过滤和修正，
+以确保其函数至少一个误用和一个修复后的版本。
+如表~\ref{tab:3-4-cwe}所示，针对于第~\ref{sec:2.3}中总结的三大类接口误用模式，
+共选取了2172个测试用例。
+为了方便研究人员和开发者理解缺陷模式和评估检测工具，
+本文将这些修订后的测试用例集成到APIMU4C，C程序接口误用数据集中。
+APIMU4C将在第~\ref{sec:4.2}详细介绍。
 
 
-目前，IMChecker已经集成在Tsmart工具集中~\cite{tsmart}，工具使用的具体细节将在第~\ref{sec:4.3}中进行介绍。
-\subsection{实验环境介绍}
-测试集合
+\input{data/tab/cp3-4-cwe}
 
-每类特点介绍
-1页
-比较对象
-0.5
+\paragraph{ 比较对象}
+首先，为了检测过滤机制的效果，本文将未添加过滤机制的方法记作为IMChecker--。
+通过IMChecker与IMChecker--在测试集上的表现差别，以评估过滤算法的有效性。
+此外，本文选取广泛使用的代表性开源工具进行检测能力的比较。
+在对工具描述文档、学术论文和预实验后，本文选取了如下三个工具：
+\begin{itemize}
+	\item APISan~\cite{16-sec-apisan}（主分支-2018-0601）：
+	该工具是一个开源的学术工具，针对于接口误用缺陷设计。
+	通过数据挖掘技术与程序分析技术结合，利用轻量级语义分析方法获得接口使用上下文信息，
+	并基于统计方法推理接口使用约束。
+	工具基于过程内分析方法，考虑函数返回值、参数关系和因果调用关系，并将规约推理的结果用于缺陷检测。
+	不过，推理的结果没有输出，也没有提供扩展规约推理方法或者接受约束的接口。
+	\item Cppcheck~\cite{cppcheck}（版本1.83）：
+	Cppcheck是针对于未定义和危险程序结构的缺陷检测工具。
+	该工具开源代码，并支持多个领域和不同的缺陷类型。
+	将代码转化为字节流（token）后，
+	基于上下文敏感（context-sensitive）和流敏感（flow-sensitive）的过程间分析方法，
+	对缺陷进行模式匹配。
+	Cppcheck在检测算法中集成了C标准库的接口。
+	同时，为了支持用户自定义的接口，提供了一套规约描述方法\footnote{http://cppcheck.sourceforge.net/manual.pdf, chapter10, page 20.}，以利用实现过算法对相同的缺陷模式进行检测。
+	例如参数空指针，内存泄漏等等。
+	\item Clang-SA~\cite{clang-sa}（版本RELEASE\_600）:
+	该工具是LLVM开源编译器的组成部分。
+	通过符号执行技术，推理程序语义。
+	该工具采用上下文敏感（context-sensitive）和流敏感（flow-sensitive）的过程间分析方法，
+	并实现了大量的检测插件，以应对不同的缺陷类型\footnote{http://clang-analyzer.llvm.org/available checks.html}。
+\end{itemize} 
+一方面，这三个工具提供了良好的缺陷报告接口，支持多种接口缺陷类型。
+另一方面，这三个工具基于不同的分析技术（数据挖掘、静态分析-硬编码、静态分析-基于规约描述）。
+同时，三个工具在预实验中的检测能力稳定，与文档论文中的描述能力一致。
+
+\paragraph{评测指标}
+在测试集上，本文将采用如下三个指标对工具进行评估。
+\begin{itemize}
+	\item 召回率（Recall）：$R = \dfrac{\text{结果报告中真实的缺陷数}}{\text{总缺陷数}}$
+	召回率是基于具体实现情况下，工具的检测能力。即，工具能够有效的检测多少缺陷。
+	缺陷检测领域普遍认为，一个工具在测试集合上的召回率越高，那么其实际应用中也会有更好的检测效果。
+	\item 精度（Precision）：$P = \dfrac{\text{结果报告中真实的缺陷数}}{\text{工具报告的缺陷总数}}$
+	研究表明，困扰实际用户使用静态分析的原因之一就是，现有的工具产生了大量的误报，即精度太低~\cite{10-acm-precision}。因此，检测工具的精度是重要的指标之一。
+	特别地，如果精度低于30\%，那么实际使用者将抛弃这个工具。
+\end{itemize}
+%\item 理想召回率（Conceptual Recall，CR）：$= \dfrac{理想情况下能够支持的缺陷数}{工具报告的缺陷总数}$
+%该指标表示工具能够支持的最大程序的检测能力。即，工具用户手册或者论文中，不考虑实现的正确性下，提到能够解决问题的全部空间。一个工具的CR越高，代表这个工具的检测能力越强。 $R = \frac{结果报告中真实的缺陷数}{总缺陷数}$
+
+\paragraph{运行环境} 本文在一台装有64 位Ubuntu 16.04的台式机上进行实验。
+该机器配有Intel(R) Core(R) i5-3470@3.20GHz-4核心CPU和32GB内存。
+本章关注接口缺陷检测的能力，因此不设置最长分析时间。
+
+
 \subsection{评测结果}
-imchecker imchecker--
 
-imchecker和其他
+\input{data/tab/cp3-4-imchecker}
+\paragraph{IMChecker评测结果}
+评测结果如表~\ref{tab:3-4-imchecker}中所示，
+其中报告数为工具缺陷的总报告数，TP为报告中真实存在的缺陷数目，P为精度，R为召回率。
+表中3-6列为IMChecker的评估结果，7-10列为IMChecker--的评测结果，即不包括过滤机制的结果。
 
-详细分析
+评测结果表明，在所有的测试用例中，
+IMChecker--共产生2742个缺陷报告，其中1893个为真实的缺陷，
+849个为误报，平均精度为69.04\%，平均召回率为87.15\%。
+在对缺陷报告深入分析后，导致IMChecker--分析结果不准确的主要原因是跨函数的接口使用。
+如第~\ref{sec:3.3}中所示，为了能够支持大规模代码有效分析，IMChecker的检测算法基于过程内分析进行。
+因此，当接口使用跨函数时，则会导致分析精度下降。
 
-结果表格解释1页
+我们通过\texttt{malloc/free}例子进行分析。
+在C的标准库中，两者组合进行堆内存的申请和释放。
+其使用约束是当前者的返回值不为NULL时，需要调用后者进行释放。
+然而IMChecker基于过程内的分析方式，对于跨越函数调用的接口，分析精度不足。
+一方面，语义信息的不足会产生误报，即将正确的用法报告称缺陷。
+例如下面代码所示，
+\begin{lstlisting}[language={C},
+basicstyle=\linespread{0.7}\listingsfont,
+numbers=left,
+xleftmargin=.2\textwidth]
+void bar(int* p){
+	// do
+	free(p);
+}
+void foo(){
+	int* p = (int*) malloc(100*sizeof(int));
+	if (p == NULL) return;
+	bar(p);
+}
+\end{lstlisting}
+IMChecker--在第6行发现调用了\texttt{malloc}函数，在第7行对返回值进行检测，
+需要调用\texttt{free}函数进行内存释放。
+然而该释放操作在第3行的\texttt{bar}函数内进行，
+因此IMChecker--并没有捕获这样的信息，导致将该用例判断为缺陷，产生一个误报。
+另一方面，同样的语义信息不足则可能导致漏报，即没有检测到缺陷。
+\begin{lstlisting}[language={C},
+basicstyle=\linespread{0.7}\listingsfont,
+numbers=left,
+xleftmargin=.2\textwidth]
+void bar(int* p){
+	// do
+	free(p);
+}
+void foo(){
+	int* p = (int*) malloc(100*sizeof(int));
+	if (p == NULL) return;
+	bar(p);
+	free(p);
+}
+\end{lstlisting}
+例如上述代码所示，IMChecker--在第9行检测到\texttt{free}函数。
+同时该函数的参数与\texttt{malloc}的返回值指向同一块内存。
+因此，IMChecker--会将该用例判断为缺陷。
+然而，在\texttt{bar}函数内，已经对该指针所指向的内存释放。
+所以这是一个重复释放内存错误（CWE-590）。
 
-自己工具每个分类的情况2页，误报、漏报原因
+为了解决上述问题，提高检测的精度，消除跨函数语义带来的影响。
+如第~\ref{sec:3.3}节介绍，IMChecker引入了基于语义和基于使用情况的过滤机制。
+在结合过滤算法后，IMChecker共产生2082个缺陷报告，其中1807个为真实缺陷。
+IMChecker的平均精度为86.79\%，平均召回率为83.20\%。
+相比较于IMChecker--，在有限的召回率损失下（3.95\%），
+IMChecker检测精度有了显著提高（17.75\%）。
+损失的召回率由于过滤机制中，对于参数和返回值的处理造成。
+\begin{lstlisting}[language={C},
+basicstyle=\linespread{0.7}\listingsfont,
+numbers=left,
+xleftmargin=.2\textwidth]
+void foo(int **p) {
+	*p = (int*) malloc(100*sizeof(int));
+	// do
+}
+\end{lstlisting}
+在实际项目中，我们发现大量的内存申请结果赋值给参数或者返回值。
+并在外界进行检测和维护。
+因此，IMChecker将这种情况下的缺陷过滤。
+然而如果外界缺少必要的操作，则会产生漏报。
+同时，虽然引入了过滤机制，IMChecker依旧存在误报和漏报。
+目前，IMChecker基于语义的过滤机制目前只计算一层函数调用的摘要信息。
+因此，当调用信息超过两层时，依旧无法准确检测。
+例如如下代码片段，
+\begin{lstlisting}[language={C},
+basicstyle=\linespread{0.7}\listingsfont,
+numbers=left,
+xleftmargin=.2\textwidth]
+void bar1(int* p){        
+	// do						   
+	free(p);					  
+}
+void bar1(int* p){        
+	// do						   
+	bar2(p);					  
+}
+void foo(){...}
+\end{lstlisting}
+由于释放函数跨越两层调用，因此无法被过滤，IMChecker将产生一个误报。
 
-其他工具对比2页
+
+此外其他一些原因同样导致IMChecker分析不够精确，包括：
+\begin{itemize}
+	\item 复杂的数据依赖关系。
+	目前IMChecker基于CPA算法实现，通过AccessPath的方式记录指向关系并维护整数信息。
+	然而当，指针存在偏移操作时，如果偏移的位置不为常量，那么IMChecker就会认为这个指针指向该内存对象所有的区间。
+	另一方面，由于目前只维护了常量整数。因此，当整数为变量时，IMChecker会认为该值可能为任何值。
+	例如，\texttt{memcpy(d,s,n)}拷贝内存内容。拷贝的长度n应小于目标d的大小。
+	然而当程序中，无法对n和d的关系进行推理时，IMChecker则会认为是错误，从而产生误报。
+	\item 函数指针。C程序提供了函数指针的语言特性。因此，在静态分析阶段，无法明确或者该指针的指向关系。
+	IMChecker在分析的过程中会忽略这部分内容。导致误报和漏报。
+	\item 循环。循环问题在程序分析中是至今无法很好解决的难题。
+	特别地，针对于接口缺陷，如第~\ref{sec:3.3}节介绍，缺陷实例调研结果显示，
+	接口缺陷很少发生在循环汇总。因此，IMChecker只展开一次循环。
+	对于如下代码中的重复释放问题，IMChecker则会产生漏报。
+\begin{lstlisting}[language={C},
+basicstyle=\linespread{0.7}\listingsfont,
+numbers=left,
+xleftmargin=.2\textwidth]
+	char * data;
+	data = NULL;
+	for(i = 0; i < 1; i++){
+		data = (char *)malloc(100*sizeof(char));
+		strcpy(data, "A String");
+	}
+	for(k = 0; k < 2; k++){
+		free(data);
+	}
+\end{lstlisting}	
+\end{itemize}
+
+针对于上述总结的不足，一个可行的解决方案引入更加精确的分析方法。
+例如，增加跨函数分析、增加循环展开、增加函数指针的映射关系、利用更精确的值分析方法等等。
+然而这些精确的语义计算会极大地影响分析效率。
+因此，如何平衡分析效率与精度需要更多的尝试。
+本文将在第~\ref{cha:con}章中进行描述。
+
+\paragraph{IMChecker与其他工具对比结果}
+
+\input{data/tab/cp3-4-other}
+
+we observe that Clang-SA fails in IEH. To find
+the reasons, we investigated the cases and algorithms behind
+the tools. Clang-SA provides many checkers targeted at finding
+API usage bugs 8 (e.g., security.insecureAPI.UncheckedReturn
+is built on uses of functions whose return values must always
+be checked), but it fails to detect the error handling bugs.
+Similar to most universal static analysis tools, it hard-codes
+the detection algorithm and fails to support the APIs in this
+dataset, which is extremely severe for the project-specific
+APIs. Unfortunately, we find it difficult to extend these checkers
+to project-specific APIs, such as providing a configuration
+or target API lists. By contrast, Cppcheck and IMSpec provide
+a specification language to address this problem. However, Cppcheck
+only supports syntactic checking, resulting in missing
+bugs in a complex context. Compared to these two tools, we
+find 991-1199 more bugs, improving the recall up to 49.41-
+52.36%.
+From the precision result, we find IMSpec achieves a better
+precision than Clang-SA. The improvement is due to the rich
+semantics captured by our static analysis engine. In contrast,
+Clang-SA performs bug detection by diverse domain-specific
+checkers (e.g. unix.API checks calls to various UNIX/POSIX
+functions). However, each checker maintains its own abstract
+states. Thus, it will generate false positives and miss real
+bugs when the analysis requires deep semantics from multiple
+domains. For example, pointer analysis usually needs intervals
+to calculate an explicit offset. Cppcheck achieves the highest
+precision, for it prefers a conservative strategy, where it only
+reports the bugs with high confidence, resulting a low recall.
+
+APISan detects API misuses by inferring usage constraints
+through semantic cross-checking. However, it fails to consider
+11.43% double-free bugs of single-file ICC cases with negative
+association pattern like A ! :B (i.e., when A appears, B
+should not appear). Moreover, it requires sufficient data to
+learn the correct usage patterns, (i.e., more correct usages
+comparing to misuses). Unfortunately, 22% of the cases in
+real-world programs cannot satisfy the minimum support value
+(i.e., at least three invocations with two correct usages).
+Finding 8: APISan fails to support 22% real-world APImisuse
+bugs because of insufficient data to learn the
+correct usage patterns.
+
+Clang-SA and Cppcheck encode API usage specifications
+into individual checkers. Even though Clang-SA provides
+diverse checkers, none of them is designed to validate the error
+status code, resulting in missing all 612 IEH cases. Projectspecific
+APIs usually have similar behaviors to C Standard
+Library. For example, functions named *\_new are usually
+designed to allocate resources. Therefore, it needs to release
+the resources after its lifecycle. Without interfaces to specify
+specifications of these APIs, Clang-SA has a limited capability
+in real-world programs and only supports 19% of real-world
+cases misusing APIs provided by C Standard Library. By providing
+an interface to define project-specific usage constraints
+in an XML-format configuration, Cppcheck supports 54%
+more bugs compared to Clang-SA as well as itself without
+configurations. However, it fails to provide a mechanism to
+specify the concrete error status code checking (e.g., return
+value of f should be -1 or -2). Moreover, Cppcheck does
+not support the context constraints between parameters of
+two functions (e.g. fNew(p1; p2) ! fFree(p2) where the
+resource allocated into p2 by fNew() should be released by
+fFree()).
+
+Table V shows that Cppcheck and Clang-SA have a quite
+low recall value (17-54% lower than conceptual recall), but
+achieves a higher precision value compared to its recall.
+Particularly, Cppcheck achieves the best precision of 89.95%
+in single-file cases and 86.36% in real-world project cases.
+We find that these two tools prefer a conservative strategy,
+i.e., they only report the bugs with high confidence to improve
+usage experience [32]. Therefore, API misuses with same root
+causes in a complex program structure may be ignored.
+
+Similar to many tools based on mining techniques, APISan
+searches the program for explicit constraints in if-statements,
+function calls or return statements. However, when such con-straints hide into the context and require semantic reasoning,
+APISan fails to learn them. Therefore, APISan fails to detect
+all IPU cases (23.48% of single-file cases). Moreover, some
+program properties cannot be explicitly represented in C
+syntax, such as misuses caused by “cwe590-free of memory
+not on the heap” in IPU, where it has to reason the context of
+the pointer to find where it points.9
+
+For all of the three detectors, the investigation results show
+that a large proportion of false positives and false negatives are
+caused by imprecise semantic analysis. (For the conservative
+strategy, we fail to count the concrete number.) In details,
+it consists of two perspectives: (1) Lack of path-sensitive
+semantics. Computing path reachabilities in static analysis
+is necessary. For example, it does not require to free()
+resource along the path where malloc() fails to allocate
+heap memory. Otherwise, it will produce a false positive. However,
+when a program catches an exception in the procedure
+after the memory allocation, it needs to take each path into
+consideration instead of matching malloc/free invocation
+counts. Because it demands to free the memory along each
+error handling path. (2) Lack of inter-procedural semantics.
+When the API usages cross functions (e.g., malloc() and
+free() are called in two callers), lack of inter-procedural
+analysis will produce a false positive of memory leak bug. In
+addition, APISan relies on static analysis to extract its usage
+representations. Imprecisions in these analyses may obscure
+relations between patterns and usages. Therefore, APISan fails
+to report 51% (78-27) of project cases because of the failure
+of correctly extracting usage contexts.
+
+综上所述，在测试集上IMChecker取得了86.79\%的检测精度和83.20\%的召回率。
+检测能力优于比较的三个知名工具。
+其中，相比较于Clang-SA和APISan，具有更高的检测精度和检测能力。
+在精度基本一致的情况下（86.79\%与89.95\%），比Cppcheck多检测（49.41\%）的缺陷。
 
 
 \section{本章小结}

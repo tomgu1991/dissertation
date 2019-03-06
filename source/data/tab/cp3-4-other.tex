@@ -1,0 +1,21 @@
+\begin{table}[b]
+	\centering
+	\begin{minipage}[t]{0.9\linewidth} % 如果想在表格中使用脚注，minipage是个不错的办法
+		\caption{对比工具评测结果}
+		\label{tab:3-4-other}
+		\begin{tabular}{cccccccccc}
+			\hline
+			\multirow{2}{*}{类别 } & \multirow{2}{*}{个数} & \multicolumn{2}{c}{APISan} & \multicolumn{2}{c}{Cppcheck} & \multicolumn{2}{c}{Clang-SA} & \multicolumn{2}{c}{IMChecker}\\
+			\cline{3-10}
+			 & & 报告数 & TP & 报告数 & TP& 报告数 & TP & 报告数 & TP \\
+			 \hline
+			 IPU & 510 &  154 & 48 & 145 &127 &127 &105 & 490 & 423\\
+			 IEH & 612 &  446 &173& 298& 270& 0& 0& 580& 506 \\
+			 IPU & 1050 &  447 &435 &373 &337 &746& 565 &1012 &878 \\
+			 总计 & 2172 &   1047& 656& 816& 734& 873& 670& 2082& 1807 \\
+			 \multicolumn{2}{c}{平均-P\%} &\multicolumn{2}{c}{62.66}  & \multicolumn{2}{c}{89.95}  &\multicolumn{2}{c}{76.75}  &\multicolumn{2}{c}{86.79} \\
+			 \multicolumn{2}{c}{平均-R\%} & \multicolumn{2}{c}{30.20} & \multicolumn{2}{c}{33.79}  &\multicolumn{2}{c}{30.85}  &\multicolumn{2}{c}{83.20}  \\
+			\hline
+		\end{tabular}
+	\end{minipage}
+\end{table}
