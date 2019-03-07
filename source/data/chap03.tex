@@ -363,7 +363,9 @@ IMChecker在CFA上对目标接口的使用情况进行检索。
 其中，$id \in \mathbb{N}, n \in \mathbb{N}, z \in \mathbb{Z}$。
 IMChecker以Accesspath~\cite{15-ase-accesspath}结构$ap$来代表内存地址。
 $ap$的形式为正则语言$v(o|d)^*(o|\epsilon)$，即是首地址$v$与偏移$o$和解引用$d$的组合。
-每一条路径$\mathit{t}$由一系列的路径动作$\mathit{a}^+$和值映射关系$\mathit{V}$组成。
+每一条路径$\mathit{t}$由一系列的路径动作$\mathit{a}^+$和动作结束时值映射关系$\mathit{V}$组成。
+需要说明的是，IMChecker基于LLVM-IR实现，因此所有的值只会被赋值一次。
+因此只需要维护一个$\mathit{V}$即可。
 IMChecker基于CFA图结构，在进行图遍历的时候进行动作提取和值分析。
 因此，IMChecker支持流敏感（flow-sensitive）分析。
 目前IMChecker关注三种路径动作，
@@ -378,9 +380,9 @@ $\mathit{V}$记录了符号变量$\mathit{sv}$到具体值$\mathit{cv}$的映射
 如果该符号值与函数、返回值无关，则直接通过$id$号来标识。
 因此，IMChecker抽取的路径信息能够支持流敏感、路径敏感、上下文敏感的语义信息。
 
-在图~\ref{fig:3-3-path-example}中，给出了图~\ref{fig:1-1-example}代码片段的路径信息。
+在图\ref{fig:3-3-path-example}中，给出了图\ref{fig:1-1-example}代码片段的路径信息。
 其中，“\_”为与例子不相关的变量，以突出重要信息。
-图~\ref{fig:1-1-example}代码片段共有三天路径，$t_1$和$t_3$为原始代码的路径信息，$t_2$为修复后代码的路径信息。
+图\ref{fig:1-1-example}代码片段共有三天路径，$t_1$和$t_3$为原始代码的路径信息，$t_2$为修复后代码的路径信息。
 所有三条路径起始于\texttt{X\_509\_get\_pubkey()}接口调用。
 $t_1$直接将接口的返回值\textbf{1\_X509\_get\_pubkey\_arg\_0}传递给\texttt{X509\_REQ\_set\_pubkey()}，忽略了对该返回值的检查。
 $t_2$中，则对该返回值进行了非空检测。
@@ -390,22 +392,172 @@ $t_3$中，同样没有直接对返回值进行检查，并直接传递给\textt
 
 \subsection{缺陷检测算法}
 
-利用CPA算法来具体实现。
+\input{data/al/cp3-3-detect}
+IMChecker的缺陷检测算法如\ref{alg:cp3-3-detect}中所示，以分解后的SpecMap和符号路径轨迹映射Trace\_Map作为输出，以缺陷检测结果R为输出。
+其中,符号路径轨迹映射是目标接口到该接口相关的路径$T$的集合：
+$$\text{Trace\_Map}: f \rightarrow T$$
+缺陷检测结果，是目标接口到缺陷信息（违反的约束$s_{item}$和路径$t$）的集合：
+$$R: f \rightarrow (s_{item}, t)$$
+IMChecker对每一个约束实例item中的目标函数进行相关路径提取，获得路径集合$T$。
+再对集合中的每一条独立的子路径$t$进行分析。
+路径分析包含三个部分，对应于规约的三个模式，即IPU、IEH和ICC。
 
-算法
-1页
-例子解释
-0.5页
+SatisfyIPU对使用约束中的前置条件进行检测。
+（1）如果在路径$t$中存在语义等价的\textbf{Assume}，
+那么该约束$p$则满足；反之如果\textbf{Assume}与$p$的语义想法，那么该路径则一定错误。
+（2）如果在路径$t$中不存在语义等价的\textbf{Assume}，那么则在路径的值映射关系$V$中判断$p$是否满足。
+如果满足则为路径对目标接口使用正确，反之不正确。
 
+SatisfyIEH对使用约束中后置条件中异常处理相关的约束进行检测。
+每一个$eh=(cod, a^+)$由两部分组成，
+错误路径检测条件$cod$（即，在$cod$满足的情况下是目标接口发生错误，
+包含目标接口的返回值$ret$），
+和异常处理动作$a^+$（即，异常处理路径上需要进行的异常处理操作）。
+因此，在缺陷检测时，首先判断路径是否为缺陷检测路径，在判断异常处理动作是否满足约束。
+（1）在目标函数调用后的子轨迹$t'$中，判断是否存在\textbf{Assume}动作，
+该动作与$ret$相关。如果不存在，则路径缺少了错误代码检查，为错误使用。
+在相关的\textbf{Assume}动作中，如果\textbf{Assume}与$cod$不等价则为非异常处理路径，不需要继续分析。
+（2）在异常处理路径上，对$a^+$中的每个约束进行判断，是否存在等价的路径动作。
+其中调用约束对\textbf{Call}动作分析，返回值约束对\textbf{Return}动作分析。
+如果存在不满足的约束，那么这条轨迹为错误使用。
 
+SatisfyICC对使用约束中后置条件中因果调用关系相关的约束进行检测。
+每一个$cc=(cod, a)$由两部分组成，
+因果调用关系上下文语义约束$cod$（即，只有在$cod$满足的情况下才调用后续接口），
+和因果调用关系的第二个接口$a$。
+因此，在缺陷检测时，分为两种情况。
+（1）
+$cod$为True，那么如果不存在等价于$a$的\textbf{Call}动作，路径为错误使用。
+（2）
+$cod$不为True。
+那么一方面，如果存在\textbf{Assume}动作等价于$cod$，则需要对$a$进行检查。
+其中，如果不存在等价的\textbf{Call}，路径为误用。
+反之为正确使用。
+另一方面，如果存在\textbf{Assume}动作不等价于$cod$，则判断是否存在于$a$等价的\textbf{Call}。
+如果存在等价的\textbf{Call}动作，那么路径使用错误。
+
+我们以图\ref{fig:3-3-path-example}中的路径作为例子，进行解释。
+接口\texttt{X509\_get\_pubkey()}用于解码证书，当发生错误是，其返回NULL作为错误代码。
+所以，其返回值需要进行检查，即IMSpec规约为
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.15\textwidth]
+(*@\textcolor{blue}{Target:}@*) X509_get_pubkey(_) -> _
+(*@\textcolor{blue}{Post:}@*) 
+	// failure status and error handling actions specific in example
+	- X509_get_pubkey_arg_0 != NULL
+\end{lstlisting}
+然而在图\ref{fig:3-3-path-example}中，只有路径$t_2$进行了显示的检测。
+即，存在路径动作
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.15\textwidth]
+2_Assume(1_X509_get_pubkey_arg_0 != NULL)
+\end{lstlisting}
+因此，IMChecker认为路径$t_1, t_3$为错误使用路径。
+被加入到缺陷报告$R$中。
 
 \subsection{检测结果过滤}
-为什么
+为了支持规模化接口缺陷检测，IMChecker基于多入口分析策略，并在分析过程中对函数展开和循环展开进行限制。
+这种分析策略会损失跨越函数的上下文信息，降低静态分析的精度，导致大量的误报。
+例如图\ref{fig:3-3-path-example}中的例子，
+虽然$t_1, t_3$都缺少必要的返回值检测，然而如图\ref{fig:1-1-example}中代码27行所示，
+\begin{lstlisting}[language={[ANSI]C},
+basicstyle=\linespread{0.7}\listingsfont,
+numbers=none,
+xleftmargin=.15\textwidth]
+(*@\textcolor{mauve}{pk = X509\_get\_pubkey(x);}@*)
+rv = check_suite_b((*@\textcolor{mauve}{pk}@*), -1, &tflags);
+	
+static int check_suite_b(EVP_PKEY *(*@\textcolor{mauve}{pkey}@*),...){
+	[(*@\dots@*)]
+	// ensure pkey not NULL
+	(*@\textcolor{mauve}{if (pkey \&\& ...)}@*)
+\end{lstlisting}
+轨迹$t_3$在参数使用的位置确保了该指针不为空。
+因此IMChecker通过两种策略对结果进行过滤，以提升检测精度。
 
-语义例子
+\paragraph{跨函数语义摘要}
+跨函数的语义摘要过滤方式，旨在通过对跨函数的语义信息计算，来对结果进行过滤。
+通过对实际项目的预实验后，IMChecker目前对四种情况进行过滤。
+令$f$为目标接口，$r$为$f$的返回值且携带错误状态信息，$c$为调用$f$的函数，
+$g$为是$f$因果调用函数，$H$为$c$中其他调用的函数。
+则过滤的模式为：
+\begin{itemize}
+	\item $r$赋值给$c$的参数。一种常见的情况为，$f$为资源申请函数，并将申请后的指针$r$赋值给$c$的参数。
+	并在$c$的上下文中对$r$进行管理。例如下列代码片段，
+	\begin{lstlisting}[language={[ANSI]C},
+	basicstyle=\linespread{0.7}\listingsfont,
+	numbers=none,
+	xleftmargin=.15\textwidth]
+	int foo(char **ptr) {
+		*ptr = (char *)malloc(100*sizeof(char));
+		return 1;
+	}
+	int bar(){
+		char *p = NULL;
+		foo(&p);
+		// handle p
+	\end{lstlisting}
+	因此，在$c$的函数体内，并没有对该指针检查或者释放。
+	\item $r$赋值给$c$的返回值。与上述情况相似，$c$直接返回$r$。
+	即，将上述代码中\text{foo}函数的形式为，
+		\begin{lstlisting}[language={[ANSI]C},
+	basicstyle=\linespread{0.7}\listingsfont,
+	numbers=none,
+	xleftmargin=.15\textwidth]
+	char *good(int size) {
+		char *data;
+		data = (char *)malloc(size*sizeof(char));
+		return data;	
+	}
+	\end{lstlisting}
+	\item $r$作为$h \in H$的参数使用。
+	一种常见的API正确使用保证是在接口的实现内，进行检测。即，对参数进行检查。
+	因此，如果$r$作为参数传递给$h$，并且$h$对参数检查，那么$f$的使用则正确。
+	例如上述例子中$t_3$的情况。
+	\item $g$在将$r$作为参数的$h \in H$中调用。即，$f-g$协同使用同时$r$需要满足约束。
+	在$c$中，$r$满足约束，并作为$h$的参数，而且$g$在$h$中调用。
+	例如下列代码，
+			\begin{lstlisting}[language={[ANSI]C},
+	basicstyle=\linespread{0.7}\listingsfont,
+	numbers=none,
+	xleftmargin=.15\textwidth]
+	void bar(char *p) {
+		if (p != NULL) free(p);
+	}
+	void foo(){
+		char * data = (char *)malloc(100*sizeof(char));
+		if (data == NULL) return;
+		bar(data);
+	...
+	\end{lstlisting}
+	
+\end{itemize}
 
-统计例子
-1.5页
+\paragraph{接口误用统计信息}
+实际项目中的接口使用情况多种多样。
+同时有些函数具有特殊的用法，后者用户提供的IMSpec存在错误。
+为了提升检测精度和对结果有效排序，
+IMChecker通过基于使用情况的统计信息进行结果优化。
+在分析过程中，IMChecker分别计算了正确路径$u_T$和错误路径$u_F$的个数。
+首先，对于所有使用次数$u_T+u_F$小于最小支持度$\alpha$（Minimum Support)的目标接口$f$的缺陷报告，
+IMChecker归纳为低置信度（Confidence）。
+IMChecker将该缺陷归纳为Warning。
+例如，一个目标接受只有一次使用并出错时，很难判断检测的结果。
+对于超过$\alpha$的目标接口，
+IMChecker根据错误置信度$\mathcal{H}$，
+$$\mathcal{H}  = ({u_T-u_F})\times\dfrac{u_T}{u_F}$$
+对结果进行排序。
+即，当正确使用与错误使用的比例越大时，则认为越多的正确使用强烈的支持了这个误用为错误。
+当比例相同时，认为正确的次数比错误的次数多，则可信度越高。
+例如，$\mathcal{H}(u_T=2, u_F=1)$与$H(u_T=3, u_F=2)$相比，前者的比例更高；
+$H(u_T=3, u_F=1)$与$H(u_T=6, u_F=2)$相比，则后者更可信。
+特别地，当$\mathcal{H} \le 1$时，即错误与正确一样多或者多余正确使用时，
+IMChecker将该缺陷归纳为Warning。
+
 \section{工具实现与实验评估}
 \label{sec:3.4}
 本节首先介绍规模化接口缺陷检测方法IMChecker的实现细节。

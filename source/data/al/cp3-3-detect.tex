@@ -1,0 +1,54 @@
+\IncMargin{1em}
+\begin{algorithm}[t]
+	\SetAlgorithmName{算法}{heuristic}{IMSpec分解算法}
+	\SetKwData{Spec}{Spec}
+	\SetKwData{spec}{spec}
+	\SetKwData{Map}{SpecMap}
+	\SetKwData{item}{item}
+	\SetKwData{Continue}{continue}
+	\SetKwData{TraceMap}{Trace\_{Map}}
+	\SetKwData{CFA}{CFA}
+	\SetKwFunction{Union}{Union}
+	\SetKwFunction{CheckIPU}{SatisfyIPU}
+	\SetKwFunction{CheckIEH}{SatisfyIEH}
+	\SetKwFunction{CheckICC}{SatisfyICC}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{New}{NewItem}
+	\SetKwInOut{Input}{输入}\SetKwInOut{Output}{输出}
+	
+	\Input{分解后的规约集合 \Map，符号路径轨迹映射\TraceMap}
+	\Output{缺陷报告 ${R}$}
+	\BlankLine
+	\For{\Map 中的每个实例 \item}{
+		$R \leftarrow \emptyset$\;
+		$T \leftarrow$ \Extract(\item.target)\;
+		\For{$T$ 中的每一条路径 $t$}{
+			\If{\item.IPU 存在}{
+				\ForEach{\item.IPU中的$p$}{
+					$b$ $\leftarrow$ \CheckIPU($p$, $t$)\;
+					\lIf{$!b$}{
+						$R$ $\leftarrow$ \Union(\item.target, $R$, $p$, $t$)
+					}
+				}
+			}
+			\If{\item.IEH 存在}{
+				\ForEach{\item.IEH中的$eh$}{
+					$b$ $\leftarrow$ \CheckIEH($pt$, $t$)\;
+					\lIf{$!b$}{
+						$R$ $\leftarrow$ \Union(\item.target, $R$, $eh$, $t$)
+					}
+				}
+			}
+			\If{\item.ICC 存在}{
+				\ForEach{\item.IEH中的$cc$}{
+					$b$ $\leftarrow$ \CheckICC($cc$, $t$)\;
+					\lIf{$!b$}{
+						$R$ $\leftarrow$ \Union(\item.target, $R$, $cc$, $t$)
+					}
+				}
+			}
+		}
+	}
+	\caption{IMChecker缺陷检测算法}
+	\label{alg:cp3-3-detect}
+\end{algorithm}\DecMargin{1em}
