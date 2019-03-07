@@ -267,23 +267,127 @@ LLVM-IR具有静态单侧赋值的属性（SSA），并且每个指令具有原�
 因此，本文后续中使用原生的C语法帮助读者理解IMChecker方法。
 
 \subsection{IMSpec规约分解}
-语法规则抽取算法
+现有工作中，最大的不足之一是缺陷模式检测难以支持用户自定义的接口。
+然而，在缺陷实例调研中，本文发现接口使用约束具有普适性。
+最典型的例子就是，用户自定义的资源管理接口与C标准哭的内存关系接口\texttt{malloc/free}具有相同的行为。
+通过接口用户自定义的接口使用描述，以重复利用实现的检测引擎能够有效的提交检测能力。
+因此，IMChecker工具接受IMSpec规约描述作为输入，基于规约描述进行缺陷检测。
+
+如第~\ref{sec:2.3}所述，接口缺陷具有三种常见类型：参数相关的IPU、异常处理相关的IEH和调用关系相关的ICC。
+每种缺陷模式都有自己的程序行为特点。
+通过针对性的检测方法，能够有效的简化缺陷检测难度、提高检测准确率。
+因此IMChecker在IMSpec解析阶段，对规约描述实例进行语义分析，将目标API完整的接口使用约束进行拆分。
+
+\input{data/al/cp3-3-imspec}
+
+IMSpec分解算法如图\ref{alg:cp3-3-imspec}所示，我们以图~\ref{fig:2-4-example-imspec}为例，
+对算法进行解释。
+分解算法以用户提供的IMSpec实例集合作为输入，
+以分解后的规约集合\textbf{\texttt{SpecMap}}作为输出。
+对于每一个实例\textbf{\texttt{spec}}，首先进行语法解析，并确认目标接口\texttt{target}。
+之后，基于解析后的结果$s$进行分解。
+则，例子中的两个目标接口为\texttt{fopen}和\texttt{fgets}。
+如果$s$中具有前置条件$pre$，那么对于每一个独立的约束条件$p$都归为IPU类别中。
+因此，通过约束
+\begin{lstlisting}[language={C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.25\textwidth]
+fopen_arg_1 != NULL,
+fopen_arg_2 IN (r, w, a, r+, w+, a+)
+\end{lstlisting}
+可知，\texttt{fopen}拥有两个前置条件需要满足。
+如果$s$中具有后置条件$post$，那么对于每一个独立的约束条件$pt$，判断其中是否含有函数调用动作$\Call$，
+并且$\Call$中是否与\texttt{target}存在数据依赖关系。
+如果满足上述两条约束，则归为ICC类别；否则归为IEH类别。
+因此，\texttt{fopen}的后置条件中，
+\begin{lstlisting}[language={C},
+basicstyle=\linespread{0.8}\listingsfont,
+numbers=none,
+xleftmargin=.25\textwidth]
+fopen_arg_0 == NULL, RETURN(foo:FILEERR);
+fopen_arg_0 != NULL, CALL(fclose: fopen_arg_0 == fclose_arg_1)
+\end{lstlisting}
+第一条没有$\Call$动作，为IEH类型；
+第二条则会ICC类型，因为存在$\Call$动作，且存在数据依赖关系即\texttt{fclose}的参数为\texttt{fopen}的返回值。
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.9\linewidth]{figures/cp3-3-multi-entry.png}
+	\caption{
+		多入口分析策略示意图
+	}
+	\label{fig:3-3-multi-entry}
+\end{figure}
 
 \subsection{多入口分析策略}
-多入口分析策略cx89
-0.5页
+经典的程序分析方法以主函数为入口，自顶向下的对程序分析。
+然而这种方式在面对大规模代码分析时，其分析效率存在巨大挑战。
+因此，为了对大规模程序支持，研究工作和分析工具开发人员选择逐函数的分析策略。
+类似的，IMChecker采用多入口的规模化分析策略。
+讲一个复杂的程序分析问题，分而治之，在保证全局有效规模化分析的同时，
+尽可能做到局部精确分析。
 
-函数展开
-循环
-0.5
+如图~\ref{fig:3-3-multi-entry}中示意图所示，
+IMChecker在CFA上对目标接口的使用情况进行检索。
+以包含目标接口$f$的函数调用$c$作为分析入口。
+如图中黄色边为$f$的调用指令，绿色箭头所指向的$c$为分析入口。
+然而，基于函数入口进行分析，随着函数展开层数增加、循环展开，依旧面临着状态空间爆炸的问题。
+因此，IMChecker在分析过程中，采取了两个策略，以支持大规模分析的同时，尽可能的降低精度损失。
+\begin{itemize}
+	\item 限制循环展开。
+	循环问题是静态程序分析的难点之一。
+	因此，IMChecker在分析的过程中，只展开一次循环，以提高分析的效率。
+	尽管，这会导致路径信息不全，降低分析的精度，但是，这并不会显著地影响分析的结果。
+	因为，第~\ref{sec:2.3}节的调研结果显示，绝大部分接口使用错误与循环无关。
+	\item 限制过程间分析。
+	在IMChecker的分析过程中，通过符号执行的方式对每一个$c$进行路径提取。
+	对函数展开会带来极大的分析负担，影响分析效率。
+	同时，第~\ref{sec:2.3}节的调研结果显示，大部分接口缺陷可以在过程内进行检测。
+	所以，IMChecker在执行时，对于$c$内的其他函数调用不会展开。
+	同时在$c$执行后，不会继续分析。
+	函数展开层数会影响接口使用缺陷检测精度，我们在过滤阶段通过引入上下文语义摘要信息进行过滤，
+	以提高检测精度。
+\end{itemize}
+
+
 \subsection{抽象符号路径提取}
+在缺陷检测之前，IMChecker通过符号执行（symbolic execution）对程序进行静态模拟执行，
+并基于符号对程序路径的语义信息进行描述。
+该方法旨在保留接口相关的语义下，尽可能简化程序结构。
 
-语法
+\input{data/code/cp3-3-path-syntax}
 
-解释用例子
+令$\mathbb{N, Z}$表示非负整数和全体整数。
+在图~\ref{fig:3-3-path-syntax}中，本节给出了IMChecker路径抽取的抽象语法结构。
+其中，$id \in \mathbb{N}, n \in \mathbb{N}, z \in \mathbb{Z}$。
+IMChecker以Accesspath~\cite{15-ase-accesspath}结构$ap$来代表内存地址。
+$ap$的形式为正则语言$v(o|d)^*(o|\epsilon)$，即是首地址$v$与偏移$o$和解引用$d$的组合。
+每一条路径$\mathit{t}$由一系列的路径动作$\mathit{a}^+$和值映射关系$\mathit{V}$组成。
+IMChecker基于CFA图结构，在进行图遍历的时候进行动作提取和值分析。
+因此，IMChecker支持流敏感（flow-sensitive）分析。
+目前IMChecker关注三种路径动作，
+程序if语句的判断条件\textbf{Assume}、函数调用\textbf{Call}和返回值\textbf{Return}。
+特别地，\textbf{Assume}能够有效的捕获路径信息（path-sensitive）。
+在分析过程中，IMChecker对每一个动作分配一个唯一的$id$，以区别分析的上下文环境（context-sensitive）。
+$\mathit{V}$记录了符号变量$\mathit{sv}$到具体值$\mathit{cv}$的映射关系。
+一个符号值由具体动作产生的$id$，产生的接口，以及对应的参数位置 $\mathit{n}$构成。
+例如， $\mathit{id}\_f\_\textbf{arg}\_\mathit{i}$表示第$id^{th}$个动作函数调用$f$的第$\mathit{i}^{th}$个参数。
+特别地，IMChecker用0表示返回值索引，即$f\_\textbf{arg}\_0$表示接口$f$的返回值。
+在\textbf{Return}中，用$\textbf{arg}\_0$表示$f$的调用者$c$的返回值，
+如果该符号值与函数、返回值无关，则直接通过$id$号来标识。
+因此，IMChecker抽取的路径信息能够支持流敏感、路径敏感、上下文敏感的语义信息。
 
-结果
-1.5页
+在图~\ref{fig:3-3-path-example}中，给出了图~\ref{fig:1-1-example}代码片段的路径信息。
+其中，“\_”为与例子不相关的变量，以突出重要信息。
+图~\ref{fig:1-1-example}代码片段共有三天路径，$t_1$和$t_3$为原始代码的路径信息，$t_2$为修复后代码的路径信息。
+所有三条路径起始于\texttt{X\_509\_get\_pubkey()}接口调用。
+$t_1$直接将接口的返回值\textbf{1\_X509\_get\_pubkey\_arg\_0}传递给\texttt{X509\_REQ\_set\_pubkey()}，忽略了对该返回值的检查。
+$t_2$中，则对该返回值进行了非空检测。
+$t_3$中，同样没有直接对返回值进行检查，并直接传递给\texttt{check\_suite\_b()}的第一个参数。
+
+\input{data/code/cp3-3-path-example}
+
 \subsection{缺陷检测算法}
 
 利用CPA算法来具体实现。
@@ -293,7 +397,6 @@ LLVM-IR具有静态单侧赋值的属性（SSA），并且每个指令具有原�
 例子解释
 0.5页
 
-%\input{data/al/cp3-3-1}
 
 
 \subsection{检测结果过滤}

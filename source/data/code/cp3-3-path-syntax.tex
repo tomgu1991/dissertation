@@ -1,0 +1,18 @@
+\begin{figure}[t]
+	\centering
+	\footnotesize
+		\begin{IEEEeqnarray*}{rCl}
+			\text{(Traces) } \mathit{T} & ::= & \mathit{t} \\
+			\text{(trace) } \mathit{t} & ::= & (id\_\mathit{a})^+; \mathit{V} \\
+			\text{(action) } \mathit{a} & ::= & \text{\textbf{Assume}} (\mathit{exp}) ~|~ \text{\textbf{Call}} ~f(\mathit{sv}^*) ~|~ \text{\textbf{Return}} (\mathit{sv}) \\
+			\text{(expression) } \mathit{exp} & ::= & \mathit{sv1}~\mathit{cmpop}~\mathit{sv2} \\
+			\text{(value map) } V & ::= & \mathit{sv} \rightarrow \mathit{cv} \\
+			\text{(symbolic variable) } \mathit{sv} & ::= & (id\_f\text{\textbf{\_arg\_}}\mathit{n}) \\
+			\text{(compare operator) } cmpop & ::= & != ~|~ == ~|~ >= ~|~ > ~|~ <= ~|~ < \\
+			\text{(concrete value) } \mathit{cv} & ::= & \mathit{z} ~|~ \mathit{ap} ~|~ \texttt{\textbf{NULL}}  \\
+			\text{(function) } f & \in & \mathbb{F}
+		\end{IEEEeqnarray*}	
+	\caption{IMChecker路径信息提取抽象语法}
+	\label{fig:3-3-path-syntax}
+	
+\end{figure}

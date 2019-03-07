@@ -1,0 +1,43 @@
+\IncMargin{1em}
+\begin{algorithm}[t]
+	\SetAlgorithmName{算法}{heuristic}{IMSpec分解算法}
+	\SetKwData{Spec}{Spec}
+	\SetKwData{spec}{spec}
+	\SetKwData{Map}{SpecMap}
+	\SetKwData{item}{item}
+	\SetKwData{Continue}{continue}
+	\SetKwFunction{Union}{Union}
+	\SetKwFunction{Parse}{Parse}
+	\SetKwFunction{New}{NewItem}
+	\SetKwInOut{Input}{输入}\SetKwInOut{Output}{输出}
+	
+	\Input{用户输入的IMSpec实例集合 \Spec}
+	\Output{分解后的规约集合 \Map}
+	\BlankLine
+	\For{\Spec 中的每个实例 \spec}{
+		$s \leftarrow$ \Parse(\spec)\;
+		\lIf{$s$ 出错}{
+			\Continue
+		}
+		\item $\leftarrow$ \New()\;
+		\item.target $\leftarrow$ $s$.target\;
+		\If{$s$ 具有pre约束条件}{
+			\ForEach{$s$.pre中的$p$}{
+				\item.IPU $\leftarrow$ \Union(\item.IPU, $p$)
+			}
+		}
+		\If{$s$ 具有post约束条件}{
+			\For{$s$.post中的$pt$}{
+				\lIf{$pt$包含函数调用且和\item.target有数据依赖关系}{
+					\item.ICC $\leftarrow$ \Union(\item.ICC, $pt$)
+				}
+				\lElse{
+					\item.IEH $\leftarrow$ \Union(\item.IEH, $pt$)
+				}
+			}
+		}
+		\Map $\leftarrow$ \Union(\Map, \item.target, \item);
+	}
+	\caption{IMSpec分解算法}
+	\label{alg:cp3-3-imspec}
+\end{algorithm}\DecMargin{1em}
