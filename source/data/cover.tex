@@ -14,7 +14,7 @@
   %=========
   % 中文信息
   %=========
-  ctitle={C程序接口缺陷\\静态检测技术研究},
+  ctitle={C程序接口误用缺陷\\静态检测技术研究},
   cdegree={工学博士},
   cdepartment={软件学院},
   cmajor={软件工程},
@@ -36,7 +36,7 @@
   %=========
   % 英文信息
   %=========
-  etitle={Static Analysis Based API-Misuse Bug Detection in C Programs},
+  etitle={Static Analysis Based API-Misuse Defect Detection in C Programs},
   % 这块比较复杂，需要分情况讨论：
   % 1. 学术型硕士
   %    edegree：必须为Master of Arts或Master of Science（注意大小写）
@@ -61,13 +61,13 @@
   % edate={December, 2005}
   %
   % 关键词用“英文逗号”分割
-  ckeywords={API误用, 静态分析, 调研, 缺陷检测},
-  ekeywords={API misuse, Static analysis, Empirical study, Bug detection}
+  %ckeywords={API误用, 静态分析, 调研, 缺陷检测},
+  %ekeywords={API misuse, Static analysis, Empirical study, Bug detection}
 }
 
 % 定义中英文摘要和关键字
 \begin{cabstract}
-  软件库通过应用编程接口的方式对已实现的功能进行封装，
+  软件库通过应用编程接口对已实现的功能进行封装，
   令开发者专注于创新，
   为现代软件提供基础构造模块。
   开发人员在使用这些接口时，需要满足各种各样的使用约束，例如调用条件和调用顺序。
@@ -75,23 +75,26 @@
   近年来，大量研究人员致力于接口误用缺陷检测。
   特别地，静态检测技术可以在开发早期应用而获得广泛关注。
   然而，快速发展的市场需求、复杂的使用模式和大量开源软件库中文档的缺失，
-  给接口正确使用带来巨大挑战。
+  给接口正确使用带来新的挑战。
   接口误用依旧普遍存在于软件系统中，是导致软件错误、系统崩溃和漏洞的重要原因之一。
-  为弥补现有研究工作的不足，本文从接口使用的领域特定规约描述、规模化静态检测技术和实际项目应用三个方面展开研究，主要内容包括：
+  为弥补现有研究工作的不足，
+  本文从面向接口使用约束的领域特定描述方法、规模化静态检测方法和实际项目应用三个方面展开研究，
+  主要内容包括：
   \begin{enumerate}
-  	\item 提出基于缺陷模式的接口使用规约描述领域特定语言IMSpec。
-  	首先，为理解C程序接口缺陷特征，本文对实际开源项目的接口误用缺陷修复报告进行研究，总结常见接口误用缺陷模式。
+  	\item 提出基于缺陷模式的接口使用约束领域特定语言IMSpec。
+  	首先，为理解C程序接口误用缺陷特征，
+  	本文对实际开源项目的接口误用缺陷修复报告进行研究，总结常见接口误用缺陷模式。
   	基于缺陷模式的特征，本文提出面向接口使用约束的领域特定语言IMSpec，
   	以描述实际项目中接口使用约束。
-  	\item 提出基于使用约束的的规模化接口缺陷检测方法IMChecker。
+  	\item 提出基于约束描述的规模化接口误用缺陷检测方法IMChecker。
   	该方法利用IMSpec语言以支持用户自定义的接口，提升检测能力；
   	通过多入口分析策略将大规模代码静态分析任务分解为独立的子任务，以应对实际项目需求；
   	并基于上下文的语义信息以及基于使用情况的统计信息两种策略对检测结果进行过滤与排序。
-  	在公开数据集上的实验结果表明，IMChecker取得了13.21\%的误报率和16.80\%的漏报率。
+  	在公开数据集上的实验结果显示，IMChecker取得13.21\%的误报率和16.80\%的漏报率。
   	该结果领先于主流的开源静态分析工具。
-  	\item 设计、整理和实现C程序接口误用数据集APIMU4C以及C程序接口缺陷检测工具集Tsmart-IMChecker。
-  	APIMU4C包含调研中缺陷实例和C程序接口测试数据集，以帮助研究人员和开发者更好的理解接口误用缺陷、评估检测工具的能力以及展开新的研究工作。
-  	Tsmart-IMChecker包含可视化规约撰写工具、缺陷分析引擎IMChecker-engine以及基于差异性对比的结果展示工具，以帮助使用者对接口误用缺陷检测。
+  	\item 设计、整理和实现C程序接口误用缺陷数据集APIMU4C以及C程序接口误用缺陷检测工具集Tsmart-IMChecker。
+  	APIMU4C包含调研中缺陷实例和C程序接口误用测试数据集，以帮助研究人员和开发者更好的理解接口误用缺陷、评估检测工具的能力以及展开新的研究工作。
+  	Tsmart-IMChecker包含可视化规约撰写工具、缺陷分析引擎IMChecker-engine以及基于差异性对比的结果展示工具，以帮助使用者对接口误用缺陷进行检测。
   \end{enumerate}
   
   本文的研究成果均已集成于可信软件工具集TsmartV3中，并成功应用于Linux内核、OpenSSL加密库、Ubuntu系统的应用软件等项目中。在提交的75个实际缺陷报告中，61个已经被开发者确认，32个被开发者修复。
@@ -100,39 +103,38 @@
 \end{cabstract}
 
 % 如果习惯关键字跟在摘要文字后面，可以用直接命令来设置，如下：
-%\ckeywords{API误用；静态分析；调研；缺陷检测}
+\ckeywords{API误用；静态分析；调研；缺陷检测}
 
 \begin{eabstract}
    Libraries provide Application Programming Interfaces (APIs) to encapsulate the internal states, 
-   which allow develoeprs to focus on innovation and provide basic building blocks for modern software products.
+   which allow developers to focus on innovation and provide primary building blocks for modern software products.
    Correct usage is required to satisfy rich constraints, such as call conditions or call orders, and violation of these constraints, called API misuses.
-   Recently, many attempts have been proposed to address the API-misuse problems. 
+   Recently, many attempts have been proposed to address API-misuse problems. 
    In particular, static analysis techniques have long prevailed as the most promising techniques, since they are typically available early in the development process.
-   In the face of the rapidly growing market demand, complex usage patterns and great missing documents of open-source APIs, 
+   In the face of rapidly growing market demand, complex usage patterns and great missing documents of open-source APIs, 
    it becomes a challenging task.
-   As a result, API misuses remain widespread and are a prevalent cause of software bugs, crashes and vulnerabilities.
+   As a result, API misuses remain widespread and are a prevalent cause of software bugs, crashes, and vulnerabilities.
    In this paper, we aim to augment the current analysis abilities from three perspectives, including a domain-specific language for API usage constraints description, 
    a constraint-directed static analysis technique for large-scale programs,
    and dataset and GUI clients applied to real-world API misuses in C programs.
    Our main contributions are summarized as follows,
    \begin{enumerate}
-   	\item A domain-specific language called IMSpec to specify the API-usage constraints.
+   	\item A domain-specific language called IMSpec to specify API-usage constraints.
    	We conduct an empirical study to understand the characteristics
    	of API-misuse bugs in real-world C programs.
-   	Leveraging this knowledge, we design a lightweight domain-specific language called IMSpec to specify the API-usage constraints of real-world APIs.
+   	Leveraging this knowledge, we design a lightweight domain-specific language called IMSpec to specify API-usage constraints of real-world APIs.
    	\item A constraint-directed static analysis technique IMChecker for large-scale programs.
-   	We propose IMChecker, a constraint-directed static analysis technique, which employs IMSpec for project-specific APIs, employs multiple-entry analysis strategy for large-scale programs, and context semantic and usage statistics to fileter and rank detection results.
+   	We propose IMChecker, a constraint-directed static analysis technique, which employs IMSpec for project-specific APIs, a multiple-entry analysis strategy for large-scale programs, and context semantic and usage statistics to filter and rank detection results.
    	The experimental results on standard benchmarks show that IMChecker achieves 13.21\% false-negative rate and 16.80\% false-positive rate, 
-   	which outperforms the state-of-the-art tools.
+   	which outperform the state-of-the-art tools.
    	\item A dataset APIMU4C and GUI toolkit Tsmart-IMChecker for API-misuse detection.
-   	APIMU4C includes all the API misuses in empirical study and a benchmark for researchers and developers to understand the nature of API misuses, evaluate current detection tools and improve API-misuse detectors.
+   	APIMU4C includes all the API-misuse instances in empirical study and a benchmark for researchers and developers to understand the nature of API misuses, evaluate current detection tools and improve API-misuse detectors.
    	We implement Tsmart-IMChecker, a GUI toolkit to help developers write IMSpec, use IMChecker engine and audit detection results.
    \end{enumerate}
 
-	Our approaches have integrated to TsmartV3 toolkit and successfully applied to real-world programs, such as Linux kernel, OpenSSL and applications of Ububntu system.
-	For all 75 submitted bug reports, 61 have been confirmed by corresponding development communities, 32 of which have been fixed and merged into master branch.
+	Our approaches have integrated to TsmartV3 toolkit and successfully applied to real-world programs, such as Linux kernel, OpenSSL and applications of Ubuntu system.
+	For all 75 submitted bug reports, 61 have been confirmed by relevant development communities, 32 of which have been fixed and merged into master branch.
 	
 	%\noindent\textbf{Key Words:} API misuse; Static analysis; Empirical study; Bug detection
 \end{eabstract}
-
-%\ekeywords{API misuse; Static analysis; Empirical study; Bug detection}
+\ekeywords{API misuse; Static analysis; Empirical study; Bug detection}
