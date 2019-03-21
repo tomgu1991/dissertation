@@ -7,7 +7,7 @@ Location: OpenSSL/crypto/x509/x509_req.c: 70
 X509_REQ *X509_to_X509_REQ(...){
 	[(*@\dots@*)]
 	(*@\textcolor{mauve}{pktmp = X509\_get\_pubkey(x);}@*)
-	// missing certificate validation of pktmp
+	//缺失对变量pktmp的检测
 	(*@\textcolor{green}{+ if (pktmp == NULL)}@*)
 	(*@\textcolor{green}{+ ~~~~goto err;}@*)
 	i = X509_REQ_set_pubkey(ret, (*@\textcolor{mauve}{pktmp}@*));
@@ -27,9 +27,9 @@ int X509_chain_check_suiteb(...){
 
 static int check_suite_b(EVP_PKEY *(*@\textcolor{mauve}{pkey}@*),...){
 	[(*@\dots@*)]
-	// ensure pkey not NULL
+	// 确保变量pkey不为空
 	(*@\textcolor{mauve}{if (pkey \&\& ...)}@*)
-	[...]// error handling
+	[...]// 异常处理代码
 }
 \end{lstlisting}
 	\caption{
