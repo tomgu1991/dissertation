@@ -67,18 +67,18 @@
 
 % 定义中英文摘要和关键字
 \begin{cabstract}
-  软件库通过应用编程接口对已实现的功能进行封装，
+  软件库是一套用于软件开发的数据和编程代码的组合，通过应用编程接口对已实现的功能进行封装，
   令开发者专注于创新，
   为现代软件提供基础构造模块。
   开发人员在使用这些接口时，需要满足各种各样的使用约束，例如调用条件和调用顺序。
-  否则将会产生接口误用。
+  否则，将会产生接口误用。
   近年来，大量研究人员致力于接口误用缺陷检测。
   特别地，静态检测技术可以在开发早期应用而获得广泛关注。
-  然而，快速发展的市场需求、复杂的使用模式和大量开源软件库中文档的缺失，
+  然而，快速发展的市场需求、复杂的使用模式和大量开源软件库中缺失的说明文档，
   给接口正确使用带来新的挑战。
   接口误用依旧普遍存在于软件系统中，是导致软件错误、系统崩溃和漏洞的重要原因之一。
   为弥补现有研究工作的不足，
-  本文从面向接口使用约束的领域特定描述方法、规模化静态检测方法和实际项目应用三个方面展开研究，
+  本文以C程序为载体，从面向接口使用约束的领域特定描述方法、规模化静态检测方法和实际项目应用三个方面展开研究，
   主要内容包括：
   \begin{enumerate}
   	\item 提出基于缺陷模式的接口使用约束领域特定语言IMSpec。
@@ -106,17 +106,17 @@
 \ckeywords{API误用；静态分析；调研；缺陷检测}
 
 \begin{eabstract}
-   Libraries provide Application Programming Interfaces (APIs) to encapsulate the internal states, 
-   which allow developers to focus on innovation and provide primary building blocks for modern software products.
+   A software library is a suite of data and programming code, which provides Application Programming Interfaces (APIs) to encapsulate the internal states. 
+   It allows developers to focus on innovation and provide primary building blocks for modern software products.
    Correct usage is required to satisfy rich constraints, such as call conditions or call orders, and violation of these constraints, called API misuses.
    Recently, many attempts have been proposed to address API-misuse problems. 
    In particular, static analysis techniques have long prevailed as the most promising techniques, since they are typically available early in the development process.
    In the face of rapidly growing market demand, complex usage patterns and great missing documents of open-source APIs, 
    it becomes a challenging task.
    As a result, API misuses remain widespread and are a prevalent cause of software bugs, crashes, and vulnerabilities.
-   In this paper, we aim to augment the current analysis abilities from three perspectives, including a domain-specific language for API usage constraints description, 
+   In this paper, we aim to augment the current analysis abilities for C programs from three perspectives, including a domain-specific language for API usage constraints description, 
    a constraint-directed static analysis technique for large-scale programs,
-   and dataset and GUI clients applied to real-world API misuses in C programs.
+   and dataset and GUI clients applied to real-world programs.
    Our main contributions are summarized as follows,
    \begin{enumerate}
    	\item A domain-specific language called IMSpec to specify API-usage constraints.
