@@ -92,8 +92,8 @@
   	并基于上下文的语义信息以及基于使用情况的统计信息两种策略对检测结果进行过滤与排序。
   	在公开数据集上的实验结果显示，IMChecker取得13.21\%的误报率和16.80\%的漏报率。
   	该结果领先于主流的开源静态分析工具。
-  	\item 设计、整理和实现C程序接口误用缺陷数据集APIMU4C以及C程序接口误用缺陷检测工具集Tsmart-IMChecker。
-  	APIMU4C包含调研中缺陷实例和C程序接口误用测试数据集，以帮助研究人员和开发者更好的理解接口误用缺陷、评估检测工具的能力以及展开新的研究工作。
+  	\item 整理C程序接口误用缺陷数据集APIMU4C以及实现C程序接口误用缺陷检测工具集Tsmart-IMChecker。
+  	APIMU4C包含调研中分析的缺陷实例和C程序接口误用测试数据集，以帮助研究人员和开发者更好的理解接口误用缺陷、评估检测工具的能力以及展开新的研究工作。
   	Tsmart-IMChecker包含可视化规约撰写工具、缺陷分析引擎IMChecker-engine以及基于差异性对比的结果展示工具，以帮助使用者对接口误用缺陷进行检测。
   \end{enumerate}
   
@@ -103,15 +103,15 @@
 \end{cabstract}
 
 % 如果习惯关键字跟在摘要文字后面，可以用直接命令来设置，如下：
-\ckeywords{API误用；静态分析；调研；缺陷检测}
+\ckeywords{API误用；静态分析；实证研究；缺陷检测}
 
 \begin{eabstract}
    A software library is a suite of data and programming code, which provides Application Programming Interfaces (APIs) to encapsulate the internal states. 
    It allows developers to focus on innovation and provide primary building blocks for modern software products.
    Correct usage is required to satisfy rich constraints, such as call conditions or call orders, and violation of these constraints, called API misuses.
-   Recently, many attempts have been proposed to address API-misuse problems. 
+   Recently, many tools, techniques and methodologies have been proposed to address API-misuse problems. 
    In particular, static analysis techniques have long prevailed as the most promising techniques, since they are typically available early in the development process.
-   In the face of rapidly growing market demand, complex usage patterns and great missing documents of open-source APIs, 
+   In the face of rapidly growing market needs, complex usage patterns and great missing documents of open-source APIs, 
    it becomes a challenging task.
    As a result, API misuses remain widespread and are a prevalent cause of software bugs, crashes, and vulnerabilities.
    In this paper, we aim to augment the current analysis abilities for C programs from three perspectives, including a domain-specific language for API usage constraints description, 
@@ -125,9 +125,9 @@
    	Leveraging this knowledge, we design a lightweight domain-specific language called IMSpec to specify API-usage constraints of real-world APIs.
    	\item A constraint-directed static analysis technique IMChecker for large-scale programs.
    	We propose IMChecker, a constraint-directed static analysis technique, which employs IMSpec for project-specific APIs, a multiple-entry analysis strategy for large-scale programs, and context semantic and usage statistics to filter and rank detection results.
-   	The experimental results on standard benchmarks show that IMChecker achieves 13.21\% false-negative rate and 16.80\% false-positive rate, 
+   	The experimental results on standard benchmarks show that IMChecker achieves 13.21\% false-positive rate and 16.80\% false-negative rate, 
    	which outperform the state-of-the-art tools.
-   	\item A dataset APIMU4C and GUI toolkit Tsmart-IMChecker for API-misuse detection.
+   	\item A dataset APIMU4C and a GUI toolkit Tsmart-IMChecker for API-misuse detection.
    	APIMU4C includes all the API-misuse instances in empirical study and a benchmark for researchers and developers to understand the nature of API misuses, evaluate current detection tools and improve API-misuse detectors.
    	We implement Tsmart-IMChecker, a GUI toolkit to help developers write IMSpec, use IMChecker engine and audit detection results.
    \end{enumerate}
