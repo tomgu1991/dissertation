@@ -1,4 +1,4 @@
-\begin{figure}[b]
+\begin{figure}[t]
 	\centering
 	\begin{minipage}[t]{0.8\linewidth}
 \begin{lstlisting}
@@ -10,17 +10,17 @@ int foo(char *fileName){
 	char buffer[100] = "";
 	FILE *pFile;
 
-// 1. missing parameter validation, resulting NPD
+// 1. 缺少参数检查，导致空指针解引用错误
 +   if(fileName == NULL) return ERROR;
 	pFile = fopen(fileName, "r");
 	if (pFile == NULL){
 
-// 2.1 incorrect error propagation
+// 2.1 错误的异常处理，返回不正确的错误状态代码
 -       return IOERR
 +       return FILEERR;
 	}
 
-// 2.2 incorrect error code status checking
+// 2.2 错误的错误状态代码检测
 -   if (fgets(buffer, 100, pFile) < 0){
 +   if (fgets(buffer, 100, pFile) == NULL){
 		goto err;
@@ -31,13 +31,13 @@ int foo(char *fileName){
 	err:
 		Log("Error read file");
 
-// 3. incorrect causal calling, resulting memory_leak
+// 3. 缺少内存释放操作，导致内存泄漏
 +   fclose(pFile);
 	return IOERR;
 }
 \end{lstlisting}
 	\caption{
-	具有多种缺陷模式的接口缺陷样例。
+	具有多种缺陷模式的接口缺陷样例
 	}
 	\label{fig:2-4-example}
 	\end{minipage}
