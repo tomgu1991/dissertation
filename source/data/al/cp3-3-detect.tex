@@ -33,14 +33,14 @@
 			}
 			\If{\item.IEH 存在}{
 				\ForEach{\item.IEH中的$eh$}{
-					$b$ $\leftarrow$ \CheckIEH($pt$, $t$)\;
+					$b$ $\leftarrow$ \CheckIEH($eh$, $t$)\;
 					\lIf{$!b$}{
 						$R$ $\leftarrow$ \Union(\item.target, $R$, $eh$, $t$)
 					}
 				}
 			}
 			\If{\item.ICC 存在}{
-				\ForEach{\item.IEH中的$cc$}{
+				\ForEach{\item.ICC中的$cc$}{
 					$b$ $\leftarrow$ \CheckICC($cc$, $t$)\;
 					\lIf{$!b$}{
 						$R$ $\leftarrow$ \Union(\item.target, $R$, $cc$, $t$)

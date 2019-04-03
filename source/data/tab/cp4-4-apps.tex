@@ -25,7 +25,7 @@ dma & 59 & SSL\_connect & crypto.c: \textbf{smtp*\_crypto} & IEH & \checkmark\ch
 vm-tools & 292 & X509*\_current\_cert & certverify.c: \textbf{VerifyCallback} & IPU & \checkmark\checkmark \\
 \cline{1-1}
 \multirow{2}{*}{irssi} & 943 & SSL*\_certificate & net*-openssl.c: \textbf{irssi*\_handshake} & IPU & $P$ \\
-    & 944 & BIO\_read & certverify.c: \textbf{set*\_info} & IEH & $P$ \\
+    & 944 & BIO\_read & certverify.c: \textbf{set*\_info} & IEH & \checkmark \\
 \cline{1-1}
 \multirow{2}{*}{keepalive} & 1003 & SSL*\_new & ssl.c: \textbf{build*\_ctx} & ICC & \checkmark\checkmark \\
     & 1004 & SSL\_new & ssl.c: \textbf{ssl\_connect} & ICC & \checkmark\checkmark \\

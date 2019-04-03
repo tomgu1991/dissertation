@@ -722,14 +722,14 @@ FreeRDP项目中通过\texttt{freerdp\_keyboard\_get\_layouts()}接口来申请�
 即使在遇到不合法或者错误的实参数据传递时，依然不返回空指针。
 因此，开发者需要显式地调用接口\texttt{SecCertificateCopyPublicKey()}，
 完成其有效性检查，确保函数\texttt{CFArrayAppendValue()}参数的正确性。
-虽然该修复只有9行，然而如图\ref{fig:2-3-fix}中13-21行所示，
+虽然该修复只有8行，然而如图\ref{fig:2-3-fix}中15-22行所示，
 该修复设计复杂的程序语义信息。
 
 
 此外，针对于图\ref{fig:2-3-icc-2}中的缺陷，虽然修复只包含两行代码（即添加内存释放操作于17行以及24行），
 但是该修复涉及到数据流关系和上下文语义关系。
 特别地，如果内存申请后有复杂的路径分支情况，开发者需要保证在每条路径上都正确地操作内存对象。
-否则就会导致如图\ref{fig:2-3-ieh-1}中的内存泄漏或者
+否则就会导致如图\ref{fig:2-3-icc-2}中的内存泄漏或者
 图\ref{fig:2-3-icc-3}中重复释放错误。
 其中，图\ref{fig:2-3-icc-3}的错误是由于开发者在前一个代码修改中，
 为修复部分可达路径上内存泄漏缺陷（sha：1c4221）所引入的重复释放错误。
@@ -739,7 +739,7 @@ FreeRDP项目中通过\texttt{freerdp\_keyboard\_get\_layouts()}接口来申请�
 	\noindent\shadowbox{
 		\centering
 		\begin{minipage}{0.85\textwidth}
-			{\kaishu 发现5：在所有被研究的API误用缺陷实例中，大部分缺陷（92.89\%）的修复代码行数在10行以内。然而，缺陷修复语义复杂，需要深入的理解缺陷发生的上下文信息。
+			{\kaishu 发现5：在所有被研究的API误用缺陷实例中，大部分缺陷（96.15\%）的修复代码行数在10行以内。然而，缺陷修复语义复杂，需要深入的理解缺陷发生的上下文信息。
 			}
 		\end{minipage}
 	}
@@ -759,7 +759,7 @@ FreeRDP项目中通过\texttt{freerdp\_keyboard\_get\_layouts()}接口来申请�
 在所有的误用实例中，本文共发现55个不同的API被误用多次。
 其中Linux内核10个，OpenSSL10个，FFmpeg14个，Curl14个，FreeRDP5个以及Httpd2个。
 这些被误用的API共发生178次，占所有实例的21.45\%。
-特别地，C语言标准库接口\texttt{calloc()}在FreeRDP项目中共出21次误用，
+特别地，C语言标准库接口\texttt{calloc()}在FreeRDP项目中共出现21次误用，
 占该项目的15.67\%。
 此外，误用第三方库API在应用软件中普遍存在。
 其中，Curl误用13次OpenSSL中的API，FreeRDP误用6次，Httpd误用3次。
@@ -815,7 +815,7 @@ IMSpec旨在通过轻量级、类程序语言结构的方式，描述API的使�
 在对接口误用缺陷的调研中，本文发现开发者在各种各样的接口中封装已实现的功能。
 这些接口多具有不同的表现形式、封装不同的功能，
 并且具有丰富的语义信息。
-因此，针对于这些API设计并进行独立的缺陷检测器在现实中难以完成。
+因此，针对这些API设计并进行独立的缺陷检测插件在现实中难以完成。
 然而这些API之间存在一些普适性的特点，即其误用模式多属于如下三种类型：
 不正确的参数使用（IPU）、不正确的异常处理（IEH）以及不正确的因果调用关系（ICC）。
 
@@ -957,7 +957,7 @@ IMSpec规约集（$\Specs$）由独立的IMSpec描述实例（$\Spec$）组成�
 	\item $\Ret$：$\Action$的具体表现动作之一，用来描述需要返回特定的值。
 	\item $\Call$：$\Action$的具体表现动作之一，用来描述需要调用特定的接口。
 	\item $\Opd$：是表达式$\Cond$中的操作数（operand），
-	包括函数参数$\Arg$、包含内置$\UnOp$操作符的函数参数、
+	包括函数参数$\Arg$、携带内置$\UnOp$操作符的函数参数、
 	空指针$\NULL$以及自然数$\Int$。
 	\item $\FunSig$：用来表示接口的声明。
 	\item $\Arg$：用来描述接口的参数，其形式为接口名、关键词“arg”以及索引位置i的组合。特别地，令i为0时表示接口的返回值。
@@ -998,7 +998,7 @@ IMSpec实例需要明确指出该描述实例的目标对象$\Target$。
 其中前置条件$\Pre$与后置条件$\Post$的组合能够有效描述
 上文中总结出普适性的三种接口使用约束。
 特别地，我们使用占位符“\_”来表示约束中我们不关心的部分
-（实现中，这部分讲处理为恒成立）。
+（实现中，这部分将被处理为恒成立）。
 通俗地讲，可以认为“\_”用来表示所有为真的条件。
 
 \textbf{Fib}标识符用来处理一种特殊的接口使用约束，
@@ -1090,13 +1090,13 @@ IMSpec提供三个内置的运算符$\UnOp$：
 	\item 
 	\textbf{\texttt{TYPE}}用来表示被作用的操作数的具体类型。
 	该类型信息则在变量声明时就确定。
-	例如，上述例子中\texttt{TYPE(ptr)}的值为指向整数类型的指针（int*），
-	而\texttt{TYPE(ptr\_c)}的值char*。
+	例如，上述例子中\texttt{TYPE(ptr)}的结果为指向整数类型的指针（int*），
+	而\texttt{TYPE(ptr\_c)}的结果为char*。
 	\item 
 	 \textbf{\texttt{MEMTYPE}}用来表示指针所指向的内存对象的区域属性，
 	即堆（heap）还是栈（stack）。
-	例如，上述例子中\texttt{MEMTYPE(ptr)}的值为heap，
-	而\texttt{MEMTYPE(buffer)}的值stack。
+	例如，上述例子中\texttt{MEMTYPE(ptr)}的结果为heap，
+	而\texttt{MEMTYPE(buffer)}的结果stack。
 	需要说明的是，C语言语法本身无法表示内存区域的属性。
 \end{itemize}
 
@@ -1155,7 +1155,7 @@ fgets_arg_0 == NULL, CALL(log: true), RETURN(_:IOERR)
 即\texttt{a}被成功执行（\texttt{cond}条件满足），
 那么就调用\texttt{b}接口。
 IMSpec通过将接口\texttt{a}作为$\Target$，并将\texttt{b}在$\Post$中描述的方式描述这种约束关系。
-例如，接口\texttt{fopen()}与\texttt{fclose()}协同对文件的打开和关系进行管理。
+例如，接口\texttt{fopen()}与\texttt{fclose()}协同对文件的打开和关闭进行管理。
 同时，当文件被成功打开时，即\texttt{fopen()}返回值不为空时，
 才需要调用\texttt{fclose()}关闭文件。
 则IMSpec的描述如图\ref{fig:2-4-example-imspec}中11行所示，
@@ -1187,10 +1187,10 @@ fopen_arg_0 != NULL, CALL(flose: fopen_arg_0 == fclose_arg_1)
 
 直观地，$l_s$和$l_e$是程序在执行$inst$语句前和执行后到达的位置。
 本文对三种程序语句进行抽象表示，包括：
-（1）函数调用语句，将对接口\texttt{fName()}的调用表示为\texttt{FCall\_fName}；
+（1）函数调用语句，即将对接口\texttt{fName()}的调用表示为\texttt{FCall\_fName}；
 （2）返回语句，即在函数中返回$v$表示为\texttt{Return\_v}；
 （3）条件判断语句（if-condition），
-即在程序中对值得判断表示为\texttt{Check\_cond}。
+即在程序中对值的判断表示为\texttt{Check\_cond}。
 对于其他语句，我们用\texttt{EMPTY}来表示。
 在程序执行的过程中，内存变量值信息则根据具体的程序语句进行变化。
 
@@ -1304,7 +1304,7 @@ IMSpec的设计初衷是对接口使用约束进行描述，
 
 \paragraph{方法}
 针对于“可描述性”，本文以\ref{sec:2.3}节调研分析中缺陷实例的误用接口为对象。
-针对随机选取的150个缺陷实例（每个项目25个），
+随机选取150个缺陷实例（每个项目25个），
 通过使用IMSpec进行描述，
 以评估IMSpec是否能对这些使用约束进行描述。
 一个API的使用约束可能非常复杂，同时需要深入的领域知识。
@@ -1338,7 +1338,7 @@ IMSpec的设计初衷是对接口使用约束进行描述，
 评估结果显示在测试用例中IMSpec能够支持多数（90.67\%）情况接口使用约束，
 且语法结构简单易于使用（平均每个实例4.35行）。
 但是该语言忽略部分C程序属性，难以涵盖所有情况。
-对于IMSpec的改进将在第~\ref{sec:5.2}中介绍。
+对于IMSpec的改进将在第~\ref{sec:5.2}节中介绍。
 此外上述用例的IMSpec规约也将用于“有效性”评估和第\ref{sec:4.4}节的案例应用中。
 
 
@@ -1376,11 +1376,11 @@ B-IMSpec提供基于IMSpec描述的接口使用约束条件。
 如果没有则打对勾。
 \begin{equation}
 \label{eq:p}
-P = \dfrac{\text{\# of 开发者报告中的真实缺陷}}{\text{\# of 开发者报告缺陷总数}}
+P = \dfrac{\text{开发者报告中的真实缺陷数}}{\text{开发者报告缺陷总数}}
 \end{equation}
 \begin{equation}
 \label{eq:r}
-R = \dfrac{\text{\# of 开发者报告中的真实缺陷}}{10}
+R = \dfrac{\text{开发者报告中的真实缺陷}}{10}
 \end{equation}
 
 
