@@ -24,7 +24,7 @@ end:
 	sk_OPENSSL_STRING_free(certflst);
 \end{lstlisting}
 	\caption{
-	FreeRDP中忽略调用关系中参数和返回值的语义关系导致的ICC-API误用缺陷（sha：1845c0b590）
+	OpenSSL中重复释放内存对象导致的ICC-API误用缺陷（sha：d285b5418e）
 	}
 	\label{fig:2-3-icc-3}
 \end{figure}
