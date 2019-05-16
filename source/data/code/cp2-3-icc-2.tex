@@ -1,4 +1,4 @@
-\begin{figure}[t]
+\begin{figure}[b]
 	\centering
 \begin{lstlisting}
 "hash": "1845c0b59098565d656c4703adfa40d7bcfb90cf",
@@ -9,25 +9,20 @@ client/common/cmdline.c
 =======================================================
 lhs: 100644 | 1000cb8af5aab2339cbf0266718b8c32ecb85d6a
 rhs: 100644 | 104f910058603ccdef5f8b4f0a5254d5bb182ba7
-@@ -1124,12 +1124,14 @@ int freerdp_client_settings_command_line_status_print(rdpSettings* settings, int
+@@ -1124,12 +1124,14 @@ int freerdp_client_settings_*_print(rdpSettings* settings, int
 
 layouts = freerdp_keyboard_get_layouts(RDP_KEYBOARD_LAYOUT_TYPE_STANDARD);
 WLog_INFO(TAG, "Keyboard Layouts");
-
 for (i = 0; layouts[i].code; i++)
 	WLog_INFO(TAG, "0x%08X\t%s", (int) layouts[i].code, layouts[i].name);
-	
 +free(layouts);
 layouts = freerdp_keyboard_get_layouts(RDP_KEYBOARD_LAYOUT_TYPE_VARIANT);
 WLog_INFO(TAG, "Keyboard Layout Variants");
-
 for (i = 0; layouts[i].code; i++)
 	WLog_INFO(TAG, "0x%08X\t%s", (int) layouts[i].code, layouts[i].name);
-
 +free(layouts);
 layouts = freerdp_keyboard_get_layouts(RDP_KEYBOARD_LAYOUT_TYPE_IME);
 WLog_INFO(TAG, "Keyboard Input Method Editors (IMEs)");
-
 ...
 free(layouts);
 \end{lstlisting}

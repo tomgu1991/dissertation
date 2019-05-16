@@ -1,4 +1,4 @@
-\begin{figure}[b]
+\begin{figure}[t]
 	\centering
 \begin{lstlisting}
 "hash": "0a618df059d93bf7fe9e3ec92e04db8bc1eeff07",
@@ -16,8 +16,6 @@ if (onp == NULL) {
 -        return (0);
 +        return 0;
 }
-
-onp->name = name;
 @@ -216,10 +216,11 @@ int OBJ_NAME_add(const char *name, int type, const char *data)
 } else {
 if (lh_OBJ_NAME_error(names_lh)) {
@@ -25,10 +23,6 @@ if (lh_OBJ_NAME_error(names_lh)) {
 -            return (0);
 +            OPENSSL_free(onp);
 +            return 0;
-}
-
--    return (1);
-+    return 1;
 }
 
 \end{lstlisting}
