@@ -38,7 +38,7 @@ APIMU4C包含三个模块：
 （2）开源项目接口误用案例库，
 （3）基于公开数据集合以及实际项目案例的接口误用测试数据集。
 APIMU4C包含本文中所有的原始数据集，
-同时研究人员和开发者可以利用Gitgrabbger对其他领域的缺陷修复进行挖掘和提取。
+同时研究人员和开发者可以利用Gitgrabber对其他领域的缺陷修复进行挖掘和提取。
 此外，接口误用测试数据集能够帮助研究人员和开发者对现有工具进行评估，
 从而设计更具针对性的检测算法、选择适用的工具进行特定种类的缺陷检测。
 
@@ -57,7 +57,7 @@ APIMU4C包含本文中所有的原始数据集，
 本章将工具集应用于Linux内核、OpenSSL安全库和Ubuntu的应用软件的最新稳定版本中，
 共发现112个新的缺陷。
 本章将缺陷报告进行整理，共提交75个给相应的开发者进行确认。
-目前，62个缺陷报告已经被开发者接收，其中32个已经在主分支中修复。
+目前，61个缺陷报告已经被开发者接收，其中32个已经在主分支中修复。
 同时，本章对实际应用中遇到的困难、应用发现进行总结，从而帮助研究人员和开发者设计更好的检测工具。
 
 
@@ -236,7 +236,7 @@ Tsmart-IMChecker是基于可视化支持的C程序接口误用缺陷检测工具
 basicstyle=\linespread{0.8}\listingsfont,
 numbers=none,
 xleftmargin=.3\textwidth]
-(*@\textcolor{blue}{Ubuntu@~:Python3}@*) imspec_writer.py
+(*@\textcolor{blue}{Ubuntu@~:python3}@*) imspec_writer.py
 \end{lstlisting}
 其运行结果被保存在用户选择目录的*.yaml文件中，
 例如图\ref{fig:2-4-example-imspec}中IMSpec实例。
@@ -277,7 +277,7 @@ xleftmargin=.3\textwidth]
 basicstyle=\linespread{0.8}\listingsfont,
 numbers=none,
 xleftmargin=.1\textwidth]
-(*@\textcolor{blue}{Ubuntu@~:Python3}@*) engine.py --spec=XXX --specDefine=XXX --input=XXX
+(*@\textcolor{blue}{Ubuntu@~:python3}@*) engine.py --spec=XXX --specDefine=XXX --input=XXX
 \end{lstlisting}
 其中，参数的具体含义如下：
 \begin{itemize}
@@ -332,7 +332,7 @@ IMChecker分析引擎将结果输出到缺陷检测报告中，针对每一个�
 	\item Bug标签为一个目标API某一种缺陷的起始标记符号。
 	\item API标签给出目标API的函数名。
 	\item Type标签给出缺陷的具体类型。在实际应用场景中，本章将缺陷的类型进行进一步扩展从而展示更具体的缺陷原因。
-	例如，IPC表示不正确地参数使用。
+	例如，IPC表示不正确的参数使用。
 	具体参数定义可以参见TsmartV3用户手册。
 	\item Spec标签给出导致误用的具体约束条件。图中所描述的约束是第一个参数不可以为NULL。
 	\item Reason标签给出基于自然语言的缺陷原因。目前针对于每一个缺陷类型，IMChecker提供一段自然语言描述的缺陷原因。
@@ -364,7 +364,7 @@ IMDisplayer结果展示工具在命令行中通过直接调用如下指令即可
 basicstyle=\linespread{0.8}\listingsfont,
 numbers=none,
 xleftmargin=.3\textwidth]
-(*@\textcolor{blue}{Ubuntu@~:Python3}@*) report_displayer.py
+(*@\textcolor{blue}{Ubuntu@~:python3}@*) report_displayer.py
 \end{lstlisting}
 如图\ref{fig:4-3-IMDisplayer}所示，IMDisplayer工具包含五个部分：
 缺陷报告路径选择模块、缺陷信息展示模块、缺陷列表、参考列表以及差异性报告及上下文信息。
@@ -404,7 +404,7 @@ IMDisplayer的设计动机来源于两点：
 
 \subsection{实验准备}
 \paragraph{应用对象}
-本章选取三个典型领域的开源项目作为应用对象，评估Tsmar-IMChecker工具在实际项目中的有效性，
+本章选取三个典型领域的开源项目作为应用对象，评估Tsmart-IMChecker工具在实际项目中的有效性，
 包括：操作系统Linux内核、广泛使用的第三方库OpenSSL安全库和
 使用第三方库的应用软件。
 其中，应用软件为Ubuntu16.04中，使用OpenSSL安全库的应用软件。
@@ -428,7 +428,7 @@ xleftmargin=.25\textwidth]
 从而提交的缺陷报告可以及时获得回复。
 对于软件包进行编译、分析需要大量的时间，
 因此本章共选择15个广泛使用、不同应用领域、开发者持续维护的应用软件。
-为有效评估Tsmar-IMChecker的检测能力（是否能够发现未知的接口误用缺陷），所有应用对象选择截止至2018年7月10-15日的最新稳定版本，
+为有效评估Tsmart-IMChecker的检测能力（是否能够发现未知的接口误用缺陷），所有应用对象选择截止至2018年7月10-15日的最新稳定版本，
 即Linux内核4.18-rc4，OpenSSL-1.1.1-pre8，以及Ubuntu操作系统中应用软件：
 \begin{itemize}
 	\item dma: 邮件服务，主分支，86个关注（Star数目）
@@ -436,7 +436,7 @@ xleftmargin=.25\textwidth]
 	\item hexchat: 网络实时聊天，版本2.14.1，1949个关注
 	\item httping: 针对HTTP请求的Ping服务，主分支，302个关注
 	\item ipmitool: 针对智能平台管理接口（Intelligent Platform Management Interface，IPMI）的控制系统，主分支，122个关注
-	\item open-vm-tools: WMware软件管理，版本10.3.0，956个关注
+	\item open-vm-tools: VMware软件管理，版本10.3.0，956个关注
 	\item irssi: 通信软件，版本1.1.1，1918个关注
 	\item keepalive: 负载均衡管理软件，版本2.0.5，1717个关注
 	\item thc-ipv6: IPV6攻击测试软件，主分支，442个关注
@@ -503,7 +503,7 @@ Ubuntu系统中的应用软件分别报告1-3个缺陷，每个项目具体数�
 \paragraph{Linux内核}
 如表\ref{tab:4-4-linux}中所示，在Linux内核中
 Tsmart-IMChecker工具共提交30个未被报告的接口缺陷。
-针对于每一个缺陷报告，本者首先在Linux的缺陷报告系统\footnote{https://bugzilla.kernel.org}中进行查询，
+针对于每一个缺陷报告，本章首先在Linux的缺陷报告系统\footnote{https://bugzilla.kernel.org}中进行查询，
 是否已经有相关缺陷报告。
 如果没有，则对缺陷报告进行提交。
 在提交报告给开发者后，其中25个已经被开发者确认并收到开发者回复的邮件。
@@ -526,7 +526,7 @@ Tsmart-IMChecker工具共提交30个未被报告的接口缺陷。
 根据Linux中错误处理机制，接口\texttt{alloc\_disk()}出错时，
 外层调用者需要返回\textbf{-ENOMEM}来表示内存不足的错误信息。
 然而在drivers/block/pktcdvd.c文件的\texttt{pkt\_setup\_dev()}函数中2718行调用该接口后，
-在异常处理路径上并有对返回值进行修改，导致一个不正确的异常处理缺陷（IEH）。
+在异常处理路径上没有对返回值进行修改，导致一个不正确的异常处理缺陷（IEH）。
 在对该缺陷进行仔细核对后，本章将缺陷提交到Linux缺陷报告系统中，编号为200505。
 该缺陷报告在提交后，获得维护者的回复。
 在经过三轮的缺陷细节讨论过后，该缺陷被维护者确认，并修改和集成到Linux内核的主分支中。
@@ -552,7 +552,7 @@ Tsmart-IMChecker工具共提交30个未被报告的接口缺陷。
 针对于每一个缺陷报告，本章首先在Github中OpenSSL代码库中提交Issue。
 在提交报告给开发者后，所有的缺陷报告都获得开发者的回复。
 其中12个已经被维护者修复并集成在主分支内，5个被标记为待评估（Assessed）。
-OpenSSL与Linux内核的缺陷报告系统不同通过Github的Issue系统维护，
+OpenSSL与Linux内核的缺陷报告系统不同，其通过Github的Issue系统维护，
 因此缺陷的提交和修复能够获得及时的反馈。
 
 \input{data/code/cp4-4-openssl-example-fix}
@@ -587,9 +587,9 @@ OpenSSL软件库是网络通信领域广泛使用的安全库，这些接口误�
 另一方面，通过完善软件库代码的质量，能够有效地为使用者提供可靠的使用样例。
 
 本章在Ubuntu16.04的应用软件中，对OpenSSL软件库接口缺陷进行检查。
-检测结果显式，这些应用软件存在大量的接口误用缺陷。
+检测结果显示，这些应用软件存在大量的接口误用缺陷。
 本章在对结果分析、核对和整理后，
-将28检测结果提交到对应的15个项目中。
+将28个检测结果提交到对应的15个项目中。
 如表\ref{tab:4-4-apps}所示，28个缺陷中19个被开发者接受，其中15个已经被成功修复。
 特别地，dma、exim、open-vm-tools、keepalive、thc-ipv6、FreeRADIUS、tinc和sslplit八个项目，对缺陷报告进行及时的确认和修复。
 虽然其他项目对缺陷报告没有修复，但部分报告已经被开发者确认并标记为下一个版本需要处理的问题。
@@ -613,7 +613,7 @@ OpenSSL的官方用户手册中指出，接口\texttt{SSL\_connect()}用于初�
 如图中代码所示，在dma项目中开发者只对负数进行检查，而忽略错误状态代码为0的情况。
 因此，当\texttt{SSL\_connect()}函数在执行时返回0时，该项目的异常处理机制将失效，程序的鲁棒性将会被破坏。
 dma项目为邮件服务，因此该错误极大可能被攻击者利用从而产生漏洞。
-本章在提交缺陷报告后，开发者进行了即使修复。
+本章在提交缺陷报告后，开发者进行了及时修复。
 如图中所示，开发者对错误状态代码的判断进行完善，从而正确执行异常处理机制。
 
 
@@ -627,7 +627,7 @@ dma项目为邮件服务，因此该错误极大可能被攻击者利用从而�
 接口误用缺陷、现有文档、缺陷提交和开发者态度。
 
 \paragraph{接口误用缺陷}
-同第\ref{sec:2.3}节调研结果相似，接口误用缺陷并不是个例，普遍存在于各种软件中。
+同第\ref{sec:2.3}节调研结果相似，接口误用缺陷并不是个例，而是普遍存在于各种软件中。
 特别地，本章共找到112个新缺陷，并提交75个高置信度（$\mathcal{H}>=3$）的缺陷报告给实际开发者。
 提交的缺陷报告中，61个（81.33\%）被开发者接受，32个（42.67\%）已经被开发者修复。
 
@@ -773,9 +773,9 @@ dma项目为邮件服务，因此该错误极大可能被攻击者利用从而�
 本章将C程序接口使用约束领域特定语言IMSpec和规模化接口误用缺陷检测方法IMChecker在实际项目中进行应用。
 为帮助研究人员和开发者理解接口误用缺陷，本章整理C程序接口误用缺陷数据集APIMU4C。
 该数据集包含来源于实际项目的接口误用案例库以及接口误用测试数据集，
-从而帮助研究人员和开发者对检测工具的性能进行评估、针对性选择检测工具以及设计设计新的检测算法。
+从而帮助研究人员和开发者对检测工具的性能进行评估、针对性选择检测工具以及设计新的检测算法。
 同时，本章设计并实现可视化支撑的C程序接口误用缺陷检测工具集Tsmart-IMChecker，
 并将工具集应用于开源项目缺陷检测中。
 应用结果显示，本章的方法能够有效地检测到实际项目中的未被发现的接口误用缺陷，并
 在Linux内核、OpenSSL库和Ubuntu系统应用软件的最新稳定版本中提交75个缺陷报告。
-其中62个已经被开发者确认，32个被开发者修复。
+其中61个已经被开发者确认，32个被开发者修复。
